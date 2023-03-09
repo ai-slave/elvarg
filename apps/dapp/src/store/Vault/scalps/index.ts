@@ -1908,7 +1908,7 @@ export const createOptionScalpSlice: StateCreator<
     ];
 
     return new ethers.Contract(
-      '0xa67fdE54fcD27c9dD066A7fb5936fDc351F88638',
+      '0xfDFaD66e08f312c31D37150C50A6b169FD4ff688',
       abi,
       provider
     );
@@ -2773,7 +2773,7 @@ export const createOptionScalpSlice: StateCreator<
     ];
 
     return new ethers.Contract(
-      '0x42dEdBd3C632bC4F652bcDfDF19B198641d18CdA',
+      '0x2b034c4b75261edf511c7a5c5c2a51af5db849d4',
       abi,
       provider
     );
