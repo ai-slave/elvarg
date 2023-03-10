@@ -216,6 +216,11 @@ const appLinks = {
           to: '/tzwap',
           description: 'Open TWAP orders',
         },
+        {
+          name: 'Zero Day To Expire',
+          to: '/zdte/dpx',
+          description: 'Buy/write ZDTE for crypto assets',
+        },
       ],
     },
   ],

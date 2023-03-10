@@ -12,6 +12,7 @@ import formatAmount from 'utils/general/formatAmount';
 import { DECIMALS_STRIKE, DECIMALS_TOKEN, DECIMALS_USD } from 'constants/index';
 
 import { LpPosition } from 'store/Vault/olp';
+import { ReactNode } from 'react';
 
 export const StyleTable = styled(TableContainer)`
   table {
@@ -220,5 +221,18 @@ export const NumberLiquidityDialogRow = ({
       data={data}
       value={`${formatAmount(underlyingValue, 4)} ${underlying}`}
     />
+  );
+};
+
+interface HeaderCellInterface {
+  children: ReactNode;
+}
+
+export const StyleTableCellHeader = (props: HeaderCellInterface) => {
+  const { children } = props;
+  return (
+    <StyleTableCell align="left" className="w-">
+      <span className="text-sm text-stieglitz">{children}</span>
+    </StyleTableCell>
   );
 };
