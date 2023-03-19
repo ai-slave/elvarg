@@ -3,6 +3,7 @@ import {
   Box,
   Table,
   TableBody,
+  TableCell,
   TableContainer,
   TableHead,
   TableRow,
@@ -94,15 +95,17 @@ export const OptionsTable = () => {
             ))}
           </TableBody>
           <TableBody>
-            <td colSpan={8}>
-              <div className="relative flex py-5 items-center col-span-8">
-                <div className="flex-grow border-t border-stieglitz"></div>
-                <span className="flex-shrink px-3 py-1 text-up-only text-sm border border-stieglitz">
-                  $1600
-                </span>
-                <div className="flex-grow border-t border-stieglitz"></div>
-              </div>
-            </td>
+            <TableRow>
+              <TableCell colSpan={7} align="center" className="border-none">
+                <div className="relative flex py-5 items-center col-span-8">
+                  <div className="flex-grow border-t border-stieglitz"></div>
+                  <span className="flex-shrink px-3 py-1 text-up-only text-sm border border-stieglitz">
+                    $1600
+                  </span>
+                  <div className="flex-grow border-t border-stieglitz"></div>
+                </div>
+              </TableCell>
+            </TableRow>
           </TableBody>
           <TableBody className="rounded-lg">
             {data?.map((optionsStats, index) => (

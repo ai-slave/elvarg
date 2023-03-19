@@ -2,17 +2,44 @@ import Head from 'next/head';
 import Box from '@mui/material/Box';
 import AppBar from 'components/common/AppBar';
 import { OpenPositions, OptionsTable } from 'components/zdte';
-import { ProvideLp } from 'components/olp';
 import ManageCard from 'components/zdte/LpTradeBox';
-import TVChart from 'components/atlantics/InsuredPerps/TVChart';
 import ZdteTvChart from 'components/zdte/TvChart';
 import Stats from 'components/zdte/Stats';
+import { useBoundStore } from 'store';
+import { useEffect } from 'react';
 
 interface Props {
   zdte: string;
 }
 
 const Zdte = ({ zdte }: Props) => {
+  const {
+    setSelectedPoolName,
+    selectedPoolName,
+    updateUserZdteLpData,
+    updateUserZdtePurchaseData,
+    chainId,
+    getZdteContract,
+    accountAddress,
+  } = useBoundStore();
+
+  useEffect(() => {
+    if (zdte && setSelectedPoolName) setSelectedPoolName(zdte);
+  }, [zdte, setSelectedPoolName]);
+
+  useEffect(() => {
+    updateUserZdteLpData().then(() => {
+      updateUserZdtePurchaseData();
+    });
+  }, [
+    updateUserZdteLpData,
+    updateUserZdtePurchaseData,
+    chainId,
+    selectedPoolName,
+    accountAddress,
+    getZdteContract,
+  ]);
+
   return (
     <Box className="bg-black min-h-screen">
       <Head>
@@ -25,7 +52,7 @@ const Zdte = ({ zdte }: Props) => {
             <Stats />
           </Box>
           <Box className="lg:max-w-4xl md:max-w-3xl sm:max-w-2xl max-w-md mx-auto px-4 lg:px-0 space-y-6">
-            <ZdteTvChart />
+            {/* <ZdteTvChart /> */}
           </Box>
           <Box className="mb-5 lg:max-w-4xl md:max-w-3xl md:m-0 mx-3 sm:max-w-3xl max-w-md lg:mx-auto px-2 lg:px-0 flex-auto">
             <OptionsTable />

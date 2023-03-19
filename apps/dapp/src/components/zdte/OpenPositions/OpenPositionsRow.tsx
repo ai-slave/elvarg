@@ -12,29 +12,33 @@ import {
 } from 'components/common/LpCommon/Table';
 import { formatAmount } from 'utils/general';
 import { getUserReadableAmount } from 'utils/contracts';
-import { DECIMALS_STRIKE } from 'constants/index';
-import getTimeToExpirationInYears from 'utils/date/getTimeToExpirationInYears';
+import { DECIMALS_STRIKE, DECIMALS_TOKEN } from 'constants/index';
 import Countdown from 'react-countdown';
 import ClosePositionDialog from 'components/zdte/ClosePositionDialog';
 import { useState } from 'react';
-
-interface IOptionPosition {
-  isPut: boolean;
-  strike: BigNumber;
-  amount: BigNumber;
-  pnl: number;
-  expiry: BigNumber;
-}
+import { IZdtePurchaseData } from 'store/Vault/zdte';
 
 export const OpenPositionsRow = ({
   position,
   idx,
 }: {
-  position: IOptionPosition;
+  position: IZdtePurchaseData;
   idx: number;
 }) => {
-  let name = `${getUserReadableAmount(position?.strike, DECIMALS_STRIKE)}`;
-  name += position.isPut ? '-P' : '-C';
+  let name = `${getUserReadableAmount(
+    position?.longStrike || position.shortStrike,
+    DECIMALS_STRIKE
+  )}`;
+
+  // enum PositionType {
+  //     LONG_PUT,
+  //     LONG_CALL,
+  //     SPREAD_PUT,
+  //     SPREAD_CALL
+  // }
+  const isPut = position.positionType === 0;
+
+  name += isPut ? '-P' : '-C';
 
   const [closeDialogAnchorEl, setCloseDialogAnchorEl] =
     useState<null | HTMLElement>(null);
@@ -44,7 +48,7 @@ export const OpenPositionsRow = ({
       <StyleLeftCell align="left">
         <Box className="flex flex-row items-center w-max">
           <Typography variant="h6" color="white" className="capitalize">
-            {position.isPut ? (
+            {isPut ? (
               <SouthEastIcon
                 fontSize="small"
                 className="fill-current text-down-bad"
@@ -63,17 +67,20 @@ export const OpenPositionsRow = ({
       </StyleCell>
       <StyleCell align="left">
         <Typography variant="h6" color="white">
-          {`${position.amount}`}
+          {`${formatAmount(
+            getUserReadableAmount(position.positions, DECIMALS_TOKEN),
+            2
+          )}`}
         </Typography>
       </StyleCell>
       <StyleCell align="left">
-        {position.pnl >= 0 ? (
+        {position.pnl.gte(BigNumber.from(0)) ? (
           <Typography variant="h6" color="up-only">
-            {`${position.pnl}`}
+            {`$${position.livePnl}`}
           </Typography>
         ) : (
           <Typography variant="h6" color="down-bad">
-            {`-$${Math.abs(position.pnl)}`}
+            {`-$${Math.abs(position.livePnl)}`}
           </Typography>
         )}
       </StyleCell>

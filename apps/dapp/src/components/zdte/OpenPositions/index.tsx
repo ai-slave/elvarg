@@ -16,6 +16,7 @@ import {
 } from 'components/common/LpCommon/Table';
 import { OpenPositionsRow } from 'components/zdte/OpenPositions/OpenPositionsRow';
 import { BigNumber } from 'ethers';
+import { useBoundStore } from 'store';
 
 const StyleHeaderTable = styled(TableContainer)`
   table {
@@ -56,6 +57,8 @@ const data = [
 ];
 
 export const OpenPositions = () => {
+  const { userZdtePurchaseData } = useBoundStore();
+
   return (
     <Box className="flex flex-col flex-grow w-full whitespace-nowrap">
       <span className="h5 mb-4">Open Positions</span>
@@ -76,7 +79,7 @@ export const OpenPositions = () => {
             </TableRow>
           </TableHead>
           <TableBody className="rounded-lg">
-            {data?.map((position, index) => (
+            {userZdtePurchaseData?.map((position, index) => (
               <OpenPositionsRow key={index} position={position} idx={index} />
             ))}
           </TableBody>
