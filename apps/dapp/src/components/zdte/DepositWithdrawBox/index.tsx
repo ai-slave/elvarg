@@ -4,19 +4,17 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Button from '@mui/material/Button';
 
 import Typography from 'components/UI/Typography';
-import Lp from 'components/zdte/LpTradeBox/Lp';
-import Trade from 'components/zdte/LpTradeBox/Trade';
+import Deposit from 'components/zdte/DepositWithdrawBox/Deposit';
+import Withdraw from 'components/zdte/DepositWithdrawBox/Withdraw';
 
-const buttonLabels = ['LP', 'Trade'];
+const buttonLabels = ['Deposit', 'Withdraw'];
 
 const ManageCard = () => {
-  const [active, setActive] = useState<string>('LP');
+  const [active, setActive] = useState<string>('Deposit');
 
   const handleClick = useCallback((e: any) => {
     setActive(e.target.textContent);
   }, []);
-
-  const renderComponent = active === 'LP' ? <Lp /> : <Trade />;
 
   return (
     <Box className="flex flex-col bg-cod-gray rounded-xl p-2 space-y-3 w-[348px]">
@@ -36,7 +34,7 @@ const ManageCard = () => {
           </Button>
         ))}
       </ButtonGroup>
-      {renderComponent}
+      {active === 'Deposit' ? <Deposit /> : <Withdraw />}
     </Box>
   );
 };

@@ -1,3 +1,4 @@
+import { ERC20__factory } from '@dopex-io/sdk';
 import { ZdtePositionMinter__factory } from './../../../mocks/factories/ZdtePositionMinter__factory';
 import { BigNumber } from 'ethers';
 import { Zdte__factory } from './../../../mocks/factories/Zdte__factory';
@@ -7,10 +8,24 @@ import { StateCreator } from 'zustand';
 import { CommonSlice } from 'store/Vault/common';
 import { WalletSlice } from 'store/Wallet';
 
+export interface IZdteData {
+  zdteAddress: string;
+  // dpx, weth
+  baseTokenAddress: string;
+  baseTokenSymbol: string;
+  userBaseTokenBalance: BigNumber;
+  // usdc
+  quoteTokenAddress: string;
+  quoteTokenSymbol: string;
+  userQuoteTokenBalance: BigNumber;
+}
+
 export interface IZdteLpData {
   baseLpContractAddress: string;
-  quoteLpContractAddress: string;
+  baseLpSymbol: string;
   baseLpBalance: BigNumber;
+  quoteLpContractAddress: string;
+  quoteLpSymbol: string;
   quoteLpBalance: BigNumber;
 }
 
@@ -33,10 +48,12 @@ export interface ZdteSlice {
   getZdteContract: Function;
   getQuoteLpContract: Function;
   getBaseLpContract: Function;
-  userZdteLpData: IZdteLpData | null;
+  userZdteLpData?: IZdteLpData;
   updateUserZdteLpData: Function;
   userZdtePurchaseData?: IZdtePurchaseData[];
   updateUserZdtePurchaseData: Function;
+  zdteData?: IZdteData;
+  updateZdteData: Function;
 }
 
 export const createZdteSlice: StateCreator<
@@ -87,7 +104,6 @@ export const createZdteSlice: StateCreator<
       throw Error('fail to create quoteLp address');
     }
   },
-  userZdteLpData: null,
   updateUserZdteLpData: async () => {
     const { getBaseLpContract, getQuoteLpContract, accountAddress } = get();
 
@@ -96,17 +112,21 @@ export const createZdteSlice: StateCreator<
     try {
       const baseLpContract = await getBaseLpContract();
       const baseLpBalance = await baseLpContract.balanceOf(accountAddress);
+      const baseLpSymbol = await baseLpContract.symbol();
 
       const quoteLpContract = await getQuoteLpContract();
       const quoteLpBalance = await quoteLpContract.balanceOf(accountAddress);
+      const quoteLpSymbol = await quoteLpContract.symbol();
 
       set((prevState) => ({
         ...prevState,
         userZdteLpData: {
           baseLpContractAddress: baseLpContract.address,
-          quoteLpContractAddress: quoteLpContract.address,
+          baseLpSymbol: baseLpSymbol,
           baseLpBalance: baseLpBalance,
+          quoteLpContractAddress: quoteLpContract.address,
           quoteLpBalance: quoteLpBalance,
+          quoteLpSymbol: quoteLpSymbol,
         },
       }));
     } catch (err) {
@@ -154,6 +174,63 @@ export const createZdteSlice: StateCreator<
     } catch (err) {
       console.log(err);
       throw new Error('fail to update userZdtePurchaseData');
+    }
+  },
+  updateZdteData: async () => {
+    const {
+      selectedPoolName,
+      provider,
+      getZdteContract,
+      accountAddress,
+      updateUserZdteLpData,
+      updateUserZdtePurchaseData,
+    } = get();
+
+    if (!selectedPoolName || !provider || !getZdteContract || !accountAddress)
+      return;
+
+    try {
+      await updateUserZdteLpData();
+      await updateUserZdtePurchaseData();
+
+      const zdteContract = await getZdteContract();
+      const zdteAddress = zdteContract.address;
+
+      const baseTokenAddress = await zdteContract.base();
+      const baseTokenContract = ERC20__factory.connect(
+        baseTokenAddress,
+        provider
+      );
+      const baseTokenSymbol = await baseTokenContract.symbol();
+      const userBaseTokenBalance = await baseTokenContract.balanceOf(
+        accountAddress
+      );
+
+      const quoteTokenAddress = await zdteContract.quote();
+      const quoteTokenContract = ERC20__factory.connect(
+        quoteTokenAddress,
+        provider
+      );
+      const quoteTokenSymbol = await quoteTokenContract.symbol();
+      const userQuoteTokenBalance = await quoteTokenContract.balanceOf(
+        accountAddress
+      );
+
+      set((prevState) => ({
+        ...prevState,
+        zdteData: {
+          zdteAddress,
+          baseTokenAddress,
+          baseTokenSymbol,
+          userBaseTokenBalance,
+          quoteTokenAddress,
+          quoteTokenSymbol,
+          userQuoteTokenBalance,
+        },
+      }));
+    } catch (err) {
+      console.log(err);
+      throw new Error('fail to update zdte data');
     }
   },
 });

@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Box from '@mui/material/Box';
 import AppBar from 'components/common/AppBar';
 import { OpenPositions, OptionsTable } from 'components/zdte';
-import ManageCard from 'components/zdte/LpTradeBox';
+import ManageCard from 'components/zdte/DepositWithdrawBox';
 import ZdteTvChart from 'components/zdte/TvChart';
 import Stats from 'components/zdte/Stats';
 import { useBoundStore } from 'store';
@@ -16,6 +16,7 @@ const Zdte = ({ zdte }: Props) => {
   const {
     setSelectedPoolName,
     selectedPoolName,
+    updateZdteData,
     updateUserZdteLpData,
     updateUserZdtePurchaseData,
     chainId,
@@ -28,10 +29,13 @@ const Zdte = ({ zdte }: Props) => {
   }, [zdte, setSelectedPoolName]);
 
   useEffect(() => {
-    updateUserZdteLpData().then(() => {
-      updateUserZdtePurchaseData();
+    updateZdteData().then(() => {
+      updateUserZdteLpData().then(() => {
+        updateUserZdtePurchaseData();
+      });
     });
   }, [
+    updateZdteData,
     updateUserZdteLpData,
     updateUserZdtePurchaseData,
     chainId,
