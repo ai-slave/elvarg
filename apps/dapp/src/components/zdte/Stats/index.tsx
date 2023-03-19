@@ -3,11 +3,20 @@ import { DECIMALS_USD, DECIMALS_TOKEN } from 'constants/index';
 import { getUserReadableAmount } from 'utils/contracts';
 import { formatAmount } from 'utils/general';
 import { Box } from '@mui/material';
+import { useBoundStore } from 'store';
 
 interface StatsProps {}
 
 const Stats: FC<StatsProps> = ({}) => {
-  const tokenSymbol = 'ETH';
+  const { tokenPrices, selectedPoolName } = useBoundStore();
+
+  const tokenPrice =
+    tokenPrices.find(
+      (token) => token.name.toLowerCase() === selectedPoolName.toLowerCase()
+    )?.price || 0;
+
+  const tokenSymbol = selectedPoolName.toUpperCase();
+
   return (
     <>
       <Box className="flex items-center text-sm">
@@ -30,7 +39,7 @@ const Stats: FC<StatsProps> = ({}) => {
           <span className="h5 capitalize">zero day to expiry options</span>
           <span className="text-gray-500">{`${tokenSymbol}/USDC`}</span>
         </Box>
-        <span className="md:ml-4 text-xl ml-auto">$123</span>
+        <span className="md:ml-4 text-xl ml-auto">${tokenPrice}</span>
       </Box>
       <div className="grid grid-rows-4 grid-flow-col border border-neutral-800 md:grid-rows-2 rounded-xl text-sm">
         <div className="border border-neutral-800 md:rounded-tr-none rounded-t-xl p-2 flex justify-between">
