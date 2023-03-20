@@ -136,7 +136,7 @@ const Withdraw: FC<WithdrawProps> = ({}) => {
           }
         />
       </Box>
-      <Box className="space-y-2 p-2">
+      <Box className="p-2">
         <ContentRow
           title="Balance"
           content={`${formatAmount(

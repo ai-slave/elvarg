@@ -120,7 +120,7 @@ const Deposit: FC<DepositProps> = ({}) => {
           className="p-0"
           leftElement={
             <Box className="flex my-auto">
-              <Box className="flex w-[6.2rem] mr-2 bg-cod-gray rounded-full space-x-2 p-1 pr-4">
+              <Box className="flex w-24 mr-2 bg-cod-gray rounded-full space-x-2 p-1 pr-4">
                 <img
                   src={`/images/tokens/${tokenSymbol}.svg`}
                   alt="tokenSymbol"
@@ -138,7 +138,7 @@ const Deposit: FC<DepositProps> = ({}) => {
           }
         />
       </Box>
-      <Box className="flex justify-between px-2">
+      <Box className="flex justify-between p-2">
         <Typography variant="h6" color="stieglitz">
           Balance
         </Typography>
@@ -156,10 +156,10 @@ const Deposit: FC<DepositProps> = ({}) => {
           <span className="text-stieglitz ml-1">{tokenSymbol}</span>
         </Typography>
       </Box>
-      <span className="text-up-only text-sm p-2">
+      {/* <span className="text-up-only text-sm p-2">
         Note: 50% of deposits will be zapped into {tokenSymbol}
-      </span>
-      <Box className="space-y-2 p-2">
+      </span> */}
+      {/* <Box className="space-y-2 p-2">
         <ContentRow
           title={`${tokenSymbol} Deposit`}
           content={`${formatAmount(
@@ -181,7 +181,7 @@ const Deposit: FC<DepositProps> = ({}) => {
             2
           )}`}
         />
-      </Box>
+      </Box> */}
       <CustomButton
         size="medium"
         className="w-full mt-5 !rounded-md"
@@ -208,7 +208,7 @@ const Deposit: FC<DepositProps> = ({}) => {
                 DECIMALS_TOKEN
               )
             ? 'Insufficient balance'
-            : 'Open Position'
+            : 'Deposit'
           : 'Approve'}
       </CustomButton>
     </Box>
