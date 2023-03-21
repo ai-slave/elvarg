@@ -1,6 +1,7 @@
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {
   Box,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -16,7 +17,11 @@ import {
   StyleTableCellHeader,
 } from 'components/common/LpCommon/Table';
 import { OptionsTableRow } from 'components/zdte/OptionsTable/OptionsTableRow';
+import { DECIMALS_STRIKE } from 'constants/index';
 import { BigNumber } from 'ethers';
+import { useBoundStore } from 'store';
+import { getUserReadableAmount } from 'utils/contracts';
+import { formatAmount } from 'utils/general';
 
 const StyleHeaderTable = styled(TableContainer)`
   table {
@@ -32,34 +37,19 @@ const StyleHeaderTable = styled(TableContainer)`
   }
 `;
 
-const data = [
-  {
-    strikePrice: BigNumber.from(100),
-    breakEven: BigNumber.from(100),
-    toBreakEven: 100,
-    pctChange: 100,
-    change: 100,
-    price: 100,
-  },
-  {
-    strikePrice: BigNumber.from(100),
-    breakEven: BigNumber.from(100),
-    toBreakEven: 100,
-    pctChange: 100,
-    change: 100,
-    price: 100,
-  },
-  {
-    strikePrice: BigNumber.from(100),
-    breakEven: BigNumber.from(100),
-    toBreakEven: 100,
-    pctChange: 100,
-    change: 100,
-    price: 100,
-  },
-];
-
 export const OptionsTable = () => {
+  const { zdteData } = useBoundStore();
+
+  if (zdteData === undefined) {
+    return (
+      <Box className="flex justify-center items-center h-screen">
+        <CircularProgress className="mb-[30rem]" size="40px" color="primary" />
+      </Box>
+    );
+  }
+
+  const tokenPrice = formatAmount(zdteData?.tokenPrice);
+
   return (
     <Box className="flex flex-col flex-grow w-full whitespace-nowrap">
       <StyleHeaderTable>
@@ -86,13 +76,17 @@ export const OptionsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody className="rounded-lg">
-            {data?.map((optionsStats, index) => (
-              <OptionsTableRow
-                key={index}
-                optionsStats={optionsStats}
-                idx={index}
-              />
-            ))}
+            {zdteData.strikes
+              .filter((s) => s.strike < zdteData.tokenPrice)
+              .map((optionsStats, index) => (
+                <OptionsTableRow
+                  tokenSymbol={zdteData.baseTokenSymbol}
+                  tokenPrice={zdteData?.tokenPrice}
+                  key={index}
+                  optionsStats={optionsStats}
+                  idx={index}
+                />
+              ))}
           </TableBody>
           <TableBody>
             <TableRow>
@@ -100,7 +94,7 @@ export const OptionsTable = () => {
                 <div className="relative flex py-5 items-center col-span-8">
                   <div className="flex-grow border-t border-stieglitz"></div>
                   <span className="flex-shrink px-3 py-1 text-up-only text-sm border border-stieglitz">
-                    $1600
+                    ${tokenPrice}
                   </span>
                   <div className="flex-grow border-t border-stieglitz"></div>
                 </div>
@@ -108,13 +102,17 @@ export const OptionsTable = () => {
             </TableRow>
           </TableBody>
           <TableBody className="rounded-lg">
-            {data?.map((optionsStats, index) => (
-              <OptionsTableRow
-                key={index}
-                optionsStats={optionsStats}
-                idx={index}
-              />
-            ))}
+            {zdteData.strikes
+              .filter((s) => s.strike > zdteData.tokenPrice)
+              .map((optionsStats, index) => (
+                <OptionsTableRow
+                  tokenSymbol={zdteData.baseTokenSymbol}
+                  key={index}
+                  tokenPrice={zdteData?.tokenPrice}
+                  optionsStats={optionsStats}
+                  idx={index}
+                />
+              ))}
           </TableBody>
         </Table>
       </StyleHeaderTable>

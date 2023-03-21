@@ -84,7 +84,7 @@ export default function ClosePositionDialog({ anchorEl, setAnchorEl }: Props) {
       width={368}
       showCloseIcon
     >
-      <Box className="">
+      <div>
         <Typography variant="h5">Close Position</Typography>
         <Box className="rounded-t-xl bg-carbon">
           <Input
@@ -129,7 +129,7 @@ export default function ClosePositionDialog({ anchorEl, setAnchorEl }: Props) {
             inputProps={{ 'aria-label': 'controlled' }}
           />
         </Box>
-      </Box>
+      </div>
       <Box className="border border-neutral-800 space-y-1 mt-2 rounded-xl">
         <Box className="flex">
           <Box className="flex flex-col border border-neutral-800 rounded-tl-xl w-full p-2">

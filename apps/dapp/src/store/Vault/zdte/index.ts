@@ -7,9 +7,22 @@ import { StateCreator } from 'zustand';
 
 import { CommonSlice } from 'store/Vault/common';
 import { WalletSlice } from 'store/Wallet';
+import { DECIMALS_STRIKE } from 'constants/index';
+import { getUserReadableAmount } from 'utils/contracts';
+
+export interface OptionsTableData {
+  strike: number;
+  breakeven: number;
+  breakevenPercentage: number;
+  change: number;
+  changePercentage: number;
+  premium: number;
+}
 
 export interface IZdteData {
   zdteAddress: string;
+  tokenPrice: number;
+  strikes: OptionsTableData[];
   // dpx, weth
   baseTokenAddress: string;
   baseTokenSymbol: string;
@@ -70,7 +83,7 @@ export const createZdteSlice: StateCreator<
     try {
       // Addresses[42161].ZDTE[selectedPoolName],
       return Zdte__factory.connect(
-        '0x1cc4f03d9fe1e5d58b6369df796eb8739b989b57',
+        '0xbfa98e6267fa1c1b8137a57c8637faaf9b34287a',
         provider
       );
     } catch (err) {
@@ -195,6 +208,32 @@ export const createZdteSlice: StateCreator<
 
       const zdteContract = await getZdteContract();
       const zdteAddress = zdteContract.address;
+      const markPrice = await zdteContract.getMarkPrice();
+      const strikeIncrement = await zdteContract.strikeIncrement();
+      const maxOtmPercentage = await zdteContract.maxOtmPercentage();
+
+      const step = getUserReadableAmount(strikeIncrement, DECIMALS_STRIKE);
+      const tokenPrice = getUserReadableAmount(markPrice, DECIMALS_STRIKE);
+
+      const upper = tokenPrice * (1 + maxOtmPercentage / 100);
+      const upperRound = Math.ceil(upper / step) * step;
+      const lower = tokenPrice * (1 - maxOtmPercentage / 100);
+      const lowerRound = Math.floor(lower / step) * step;
+
+      const strikes: OptionsTableData[] = [];
+
+      for (let i = lowerRound; i <= upperRound; i += step) {
+        strikes.push({
+          strike: i,
+          breakeven: roundToNearestHalf((i * 100) / tokenPrice),
+          breakevenPercentage: roundToNearestHalf((i * 100) / tokenPrice),
+          change: i - tokenPrice,
+          changePercentage: roundToNearestHalf(
+            ((i - tokenPrice) * 100) / tokenPrice
+          ),
+          premium: 43,
+        });
+      }
 
       const baseTokenAddress = await zdteContract.base();
       const baseTokenContract = ERC20__factory.connect(
@@ -220,6 +259,8 @@ export const createZdteSlice: StateCreator<
         ...prevState,
         zdteData: {
           zdteAddress,
+          tokenPrice,
+          strikes,
           baseTokenAddress,
           baseTokenSymbol,
           userBaseTokenBalance,
@@ -234,3 +275,7 @@ export const createZdteSlice: StateCreator<
     }
   },
 });
+
+function roundToNearestHalf(num: number): number {
+  return Math.round(num * 2) / 2;
+}

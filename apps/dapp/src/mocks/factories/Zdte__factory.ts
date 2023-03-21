@@ -292,6 +292,19 @@ const _abi = [
     type: 'event',
   },
   {
+    inputs: [],
+    name: 'STRIKE_DECIMALS',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -331,6 +344,91 @@ const _abi = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'baseLpTokenLiquidty',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'strike',
+        type: 'uint256',
+      },
+    ],
+    name: 'calcOpeningFees',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'openingFees',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+    ],
+    name: 'calcPnl',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'pnl',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'strike',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'timeToExpiry',
+        type: 'uint256',
+      },
+    ],
+    name: 'calcPremium',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'premium',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'uint256',
@@ -359,19 +457,6 @@ const _abi = [
     name: 'deposit',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'divisor',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -636,6 +721,19 @@ const _abi = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'quoteLpTokenLiquidty',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -653,6 +751,19 @@ const _abi = [
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'spreadMarginSafety',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -731,6 +842,19 @@ const _abi = [
   {
     inputs: [],
     name: 'unpause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '_spreadMarginSafety',
+        type: 'uint256',
+      },
+    ],
+    name: 'updateMarginOfSafety',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

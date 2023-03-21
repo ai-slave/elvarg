@@ -29,12 +29,16 @@ import type {
 
 export interface ZdteInterface extends utils.Interface {
   functions: {
+    'STRIKE_DECIMALS()': FunctionFragment;
     'addToContractWhitelist(address)': FunctionFragment;
     'base()': FunctionFragment;
     'baseLp()': FunctionFragment;
+    'baseLpTokenLiquidty()': FunctionFragment;
+    'calcOpeningFees(uint256,uint256)': FunctionFragment;
+    'calcPnl(uint256)': FunctionFragment;
+    'calcPremium(uint256,uint256,uint256)': FunctionFragment;
     'claimCollateral(uint256)': FunctionFragment;
     'deposit(bool,uint256)': FunctionFragment;
-    'divisor()': FunctionFragment;
     'emergencyWithdraw(address[],bool)': FunctionFragment;
     'expireOptionPosition(uint256)': FunctionFragment;
     'feeDistributor()': FunctionFragment;
@@ -53,13 +57,16 @@ export interface ZdteInterface extends utils.Interface {
     'priceOracle()': FunctionFragment;
     'quote()': FunctionFragment;
     'quoteLp()': FunctionFragment;
+    'quoteLpTokenLiquidty()': FunctionFragment;
     'removeFromContractWhitelist(address)': FunctionFragment;
     'renounceOwnership()': FunctionFragment;
+    'spreadMarginSafety()': FunctionFragment;
     'spreadOptionPosition(bool,uint256,uint256,uint256)': FunctionFragment;
     'strikeIncrement()': FunctionFragment;
     'transferOwnership(address)': FunctionFragment;
     'uniswapV3Router()': FunctionFragment;
     'unpause()': FunctionFragment;
+    'updateMarginOfSafety(uint256)': FunctionFragment;
     'volatilityOracle()': FunctionFragment;
     'whitelistedContracts(address)': FunctionFragment;
     'withdraw(bool,uint256)': FunctionFragment;
@@ -69,12 +76,16 @@ export interface ZdteInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | 'STRIKE_DECIMALS'
       | 'addToContractWhitelist'
       | 'base'
       | 'baseLp'
+      | 'baseLpTokenLiquidty'
+      | 'calcOpeningFees'
+      | 'calcPnl'
+      | 'calcPremium'
       | 'claimCollateral'
       | 'deposit'
-      | 'divisor'
       | 'emergencyWithdraw'
       | 'expireOptionPosition'
       | 'feeDistributor'
@@ -93,13 +104,16 @@ export interface ZdteInterface extends utils.Interface {
       | 'priceOracle'
       | 'quote'
       | 'quoteLp'
+      | 'quoteLpTokenLiquidty'
       | 'removeFromContractWhitelist'
       | 'renounceOwnership'
+      | 'spreadMarginSafety'
       | 'spreadOptionPosition'
       | 'strikeIncrement'
       | 'transferOwnership'
       | 'uniswapV3Router'
       | 'unpause'
+      | 'updateMarginOfSafety'
       | 'volatilityOracle'
       | 'whitelistedContracts'
       | 'withdraw'
@@ -108,11 +122,35 @@ export interface ZdteInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
+    functionFragment: 'STRIKE_DECIMALS',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: 'addToContractWhitelist',
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: 'base', values?: undefined): string;
   encodeFunctionData(functionFragment: 'baseLp', values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: 'baseLpTokenLiquidty',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calcOpeningFees',
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calcPnl',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calcPremium',
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
   encodeFunctionData(
     functionFragment: 'claimCollateral',
     values: [PromiseOrValue<BigNumberish>]
@@ -121,7 +159,6 @@ export interface ZdteInterface extends utils.Interface {
     functionFragment: 'deposit',
     values: [PromiseOrValue<boolean>, PromiseOrValue<BigNumberish>]
   ): string;
-  encodeFunctionData(functionFragment: 'divisor', values?: undefined): string;
   encodeFunctionData(
     functionFragment: 'emergencyWithdraw',
     values: [PromiseOrValue<string>[], PromiseOrValue<boolean>]
@@ -184,11 +221,19 @@ export interface ZdteInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'quote', values?: undefined): string;
   encodeFunctionData(functionFragment: 'quoteLp', values?: undefined): string;
   encodeFunctionData(
+    functionFragment: 'quoteLpTokenLiquidty',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: 'removeFromContractWhitelist',
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: 'renounceOwnership',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'spreadMarginSafety',
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -214,6 +259,10 @@ export interface ZdteInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: 'unpause', values?: undefined): string;
   encodeFunctionData(
+    functionFragment: 'updateMarginOfSafety',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: 'volatilityOracle',
     values?: undefined
   ): string;
@@ -235,17 +284,33 @@ export interface ZdteInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: 'STRIKE_DECIMALS',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: 'addToContractWhitelist',
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: 'base', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'baseLp', data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: 'baseLpTokenLiquidty',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'calcOpeningFees',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'calcPnl', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'calcPremium',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: 'claimCollateral',
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'divisor', data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: 'emergencyWithdraw',
     data: BytesLike
@@ -301,11 +366,19 @@ export interface ZdteInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'quote', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'quoteLp', data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: 'quoteLpTokenLiquidty',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: 'removeFromContractWhitelist',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: 'renounceOwnership',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'spreadMarginSafety',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -325,6 +398,10 @@ export interface ZdteInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'updateMarginOfSafety',
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: 'volatilityOracle',
     data: BytesLike
@@ -524,6 +601,8 @@ export interface Zdte extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -532,6 +611,26 @@ export interface Zdte extends BaseContract {
     base(overrides?: CallOverrides): Promise<[string]>;
 
     baseLp(overrides?: CallOverrides): Promise<[string]>;
+
+    baseLpTokenLiquidty(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    calcOpeningFees(
+      amount: PromiseOrValue<BigNumberish>,
+      strike: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { openingFees: BigNumber }>;
+
+    calcPnl(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { pnl: BigNumber }>;
+
+    calcPremium(
+      strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
+      timeToExpiry: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { premium: BigNumber }>;
 
     claimCollateral(
       amount: PromiseOrValue<BigNumberish>,
@@ -543,8 +642,6 @@ export interface Zdte extends BaseContract {
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    divisor(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
@@ -606,6 +703,8 @@ export interface Zdte extends BaseContract {
 
     quoteLp(overrides?: CallOverrides): Promise<[string]>;
 
+    quoteLpTokenLiquidty(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     removeFromContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -614,6 +713,8 @@ export interface Zdte extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    spreadMarginSafety(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     spreadOptionPosition(
       isPut: PromiseOrValue<boolean>,
@@ -633,6 +734,11 @@ export interface Zdte extends BaseContract {
     uniswapV3Router(overrides?: CallOverrides): Promise<[string]>;
 
     unpause(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    updateMarginOfSafety(
+      _spreadMarginSafety: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -683,6 +789,8 @@ export interface Zdte extends BaseContract {
     >;
   };
 
+  STRIKE_DECIMALS(overrides?: CallOverrides): Promise<BigNumber>;
+
   addToContractWhitelist(
     _contract: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -691,6 +799,26 @@ export interface Zdte extends BaseContract {
   base(overrides?: CallOverrides): Promise<string>;
 
   baseLp(overrides?: CallOverrides): Promise<string>;
+
+  baseLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
+
+  calcOpeningFees(
+    amount: PromiseOrValue<BigNumberish>,
+    strike: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  calcPnl(
+    id: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  calcPremium(
+    strike: PromiseOrValue<BigNumberish>,
+    amount: PromiseOrValue<BigNumberish>,
+    timeToExpiry: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   claimCollateral(
     amount: PromiseOrValue<BigNumberish>,
@@ -702,8 +830,6 @@ export interface Zdte extends BaseContract {
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  divisor(overrides?: CallOverrides): Promise<BigNumber>;
 
   emergencyWithdraw(
     tokens: PromiseOrValue<string>[],
@@ -761,6 +887,8 @@ export interface Zdte extends BaseContract {
 
   quoteLp(overrides?: CallOverrides): Promise<string>;
 
+  quoteLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
+
   removeFromContractWhitelist(
     _contract: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -769,6 +897,8 @@ export interface Zdte extends BaseContract {
   renounceOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  spreadMarginSafety(overrides?: CallOverrides): Promise<BigNumber>;
 
   spreadOptionPosition(
     isPut: PromiseOrValue<boolean>,
@@ -788,6 +918,11 @@ export interface Zdte extends BaseContract {
   uniswapV3Router(overrides?: CallOverrides): Promise<string>;
 
   unpause(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  updateMarginOfSafety(
+    _spreadMarginSafety: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -838,6 +973,8 @@ export interface Zdte extends BaseContract {
   >;
 
   callStatic: {
+    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<BigNumber>;
+
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -846,6 +983,26 @@ export interface Zdte extends BaseContract {
     base(overrides?: CallOverrides): Promise<string>;
 
     baseLp(overrides?: CallOverrides): Promise<string>;
+
+    baseLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
+
+    calcOpeningFees(
+      amount: PromiseOrValue<BigNumberish>,
+      strike: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcPnl(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcPremium(
+      strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
+      timeToExpiry: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     claimCollateral(
       amount: PromiseOrValue<BigNumberish>,
@@ -857,8 +1014,6 @@ export interface Zdte extends BaseContract {
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    divisor(overrides?: CallOverrides): Promise<BigNumber>;
 
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
@@ -914,12 +1069,16 @@ export interface Zdte extends BaseContract {
 
     quoteLp(overrides?: CallOverrides): Promise<string>;
 
+    quoteLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
+
     removeFromContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    spreadMarginSafety(overrides?: CallOverrides): Promise<BigNumber>;
 
     spreadOptionPosition(
       isPut: PromiseOrValue<boolean>,
@@ -939,6 +1098,11 @@ export interface Zdte extends BaseContract {
     uniswapV3Router(overrides?: CallOverrides): Promise<string>;
 
     unpause(overrides?: CallOverrides): Promise<void>;
+
+    updateMarginOfSafety(
+      _spreadMarginSafety: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     volatilityOracle(overrides?: CallOverrides): Promise<string>;
 
@@ -1089,6 +1253,8 @@ export interface Zdte extends BaseContract {
   };
 
   estimateGas: {
+    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<BigNumber>;
+
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1097,6 +1263,26 @@ export interface Zdte extends BaseContract {
     base(overrides?: CallOverrides): Promise<BigNumber>;
 
     baseLp(overrides?: CallOverrides): Promise<BigNumber>;
+
+    baseLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
+
+    calcOpeningFees(
+      amount: PromiseOrValue<BigNumberish>,
+      strike: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcPnl(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcPremium(
+      strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
+      timeToExpiry: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     claimCollateral(
       amount: PromiseOrValue<BigNumberish>,
@@ -1108,8 +1294,6 @@ export interface Zdte extends BaseContract {
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    divisor(overrides?: CallOverrides): Promise<BigNumber>;
 
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
@@ -1167,6 +1351,8 @@ export interface Zdte extends BaseContract {
 
     quoteLp(overrides?: CallOverrides): Promise<BigNumber>;
 
+    quoteLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
+
     removeFromContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1175,6 +1361,8 @@ export interface Zdte extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    spreadMarginSafety(overrides?: CallOverrides): Promise<BigNumber>;
 
     spreadOptionPosition(
       isPut: PromiseOrValue<boolean>,
@@ -1194,6 +1382,11 @@ export interface Zdte extends BaseContract {
     uniswapV3Router(overrides?: CallOverrides): Promise<BigNumber>;
 
     unpause(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    updateMarginOfSafety(
+      _spreadMarginSafety: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1219,6 +1412,8 @@ export interface Zdte extends BaseContract {
   };
 
   populateTransaction: {
+    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1227,6 +1422,28 @@ export interface Zdte extends BaseContract {
     base(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     baseLp(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    baseLpTokenLiquidty(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calcOpeningFees(
+      amount: PromiseOrValue<BigNumberish>,
+      strike: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calcPnl(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calcPremium(
+      strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
+      timeToExpiry: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     claimCollateral(
       amount: PromiseOrValue<BigNumberish>,
@@ -1238,8 +1455,6 @@ export interface Zdte extends BaseContract {
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    divisor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
@@ -1297,6 +1512,10 @@ export interface Zdte extends BaseContract {
 
     quoteLp(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    quoteLpTokenLiquidty(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     removeFromContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1304,6 +1523,10 @@ export interface Zdte extends BaseContract {
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    spreadMarginSafety(
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     spreadOptionPosition(
@@ -1324,6 +1547,11 @@ export interface Zdte extends BaseContract {
     uniswapV3Router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     unpause(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateMarginOfSafety(
+      _spreadMarginSafety: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

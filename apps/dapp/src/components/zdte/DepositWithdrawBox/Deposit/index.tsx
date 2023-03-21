@@ -1,6 +1,5 @@
 import { ERC20__factory } from '@dopex-io/sdk';
 import { Box } from '@mui/material';
-import ContentRow from 'components/atlantics/InsuredPerps/ManageCard/ManagePosition/ContentRow';
 import { CustomButton, Input, Typography } from 'components/UI';
 import { DECIMALS_TOKEN, MAX_VALUE } from 'constants/index';
 import { BigNumber, utils } from 'ethers';

@@ -1,80 +1,119 @@
-import { BigNumber } from 'ethers';
-
 import { Box, TableRow } from '@mui/material';
 
 import { CustomButton, Typography } from 'components/UI';
 import {
   StyleCell,
   StyleLeftCell,
-  StyleLeftTableCell,
   StyleRightCell,
-  StyleRightTableCell,
-  StyleTableCellHeader,
 } from 'components/common/LpCommon/Table';
-import { formatAmount } from 'utils/general';
-import { getUserReadableAmount } from 'utils/contracts';
-import { DECIMALS_TOKEN } from 'constants/index';
+import { OptionsTableData } from 'store/Vault/zdte';
+import PurchaseOptionDialog from 'components/zdte/OptionsTable/PurchaseOptionsDialog';
+import { useState } from 'react';
 
-interface IOptionStats {
-  strikePrice: BigNumber;
-  breakEven: BigNumber;
-  toBreakEven: number;
-  pctChange: number;
-  change: number;
-  price: number;
-}
+const FormatDollarColor = ({ value }: { value: number }) => {
+  if (value > 0) {
+    return (
+      <Typography variant="h6" color="up-only">
+        {`$${value}`}
+      </Typography>
+    );
+  } else if (value < 0) {
+    return (
+      <Typography variant="h6" color="down-bad">
+        {`-$${Math.abs(value)}`}
+      </Typography>
+    );
+  } else {
+    return (
+      <Typography variant="h6" color="white">
+        {`$${value}`}
+      </Typography>
+    );
+  }
+};
+
+const FormatPercentColor = ({ value }: { value: number }) => {
+  if (value > 0) {
+    return (
+      <Typography variant="h6" color="up-only">
+        {`${value}%`}
+      </Typography>
+    );
+  } else if (value < 0) {
+    return (
+      <Typography variant="h6" color="down-bad">
+        {`-${Math.abs(value)}%`}
+      </Typography>
+    );
+  } else {
+    return (
+      <Typography variant="h6" color="white">
+        {`${value}%`}
+      </Typography>
+    );
+  }
+};
 
 export const OptionsTableRow = ({
   optionsStats,
+  tokenPrice,
+  tokenSymbol,
   idx,
 }: {
-  optionsStats: IOptionStats;
+  optionsStats: OptionsTableData;
+  tokenSymbol: string;
+  tokenPrice: number;
   idx: number;
 }) => {
+  const direction = optionsStats.strike < tokenPrice ? 'Short' : 'Long';
+  const [openDialogAnchorEl, setOpenDialogAnchorEl] =
+    useState<null | HTMLElement>(null);
   return (
     <TableRow key={idx} className="text-white mb-2 rounded-lg">
       <StyleLeftCell align="left">
         <Box className="flex flex-row items-center w-max">
           <Typography variant="h6" color="white" className="capitalize">
-            $
-            {formatAmount(
-              getUserReadableAmount(optionsStats.strikePrice, DECIMALS_TOKEN),
-              2
-            )}
+            ${optionsStats.strike}
           </Typography>
         </Box>
       </StyleLeftCell>
       <StyleCell align="left">
         <Typography variant="h6" color="white">
-          $
-          {formatAmount(
-            getUserReadableAmount(optionsStats.breakEven, DECIMALS_TOKEN),
-            2
-          )}
+          ${optionsStats.breakeven}
         </Typography>
       </StyleCell>
       <StyleCell align="left">
         <Typography variant="h6" color="white">
-          {optionsStats.toBreakEven}%
+          {optionsStats.breakevenPercentage}%
         </Typography>
       </StyleCell>
       <StyleCell align="left">
-        <Typography variant="h6" color="white">
-          {optionsStats.pctChange}%
-        </Typography>
+        <FormatPercentColor value={optionsStats.changePercentage} />
+      </StyleCell>
+      <StyleCell align="left">
+        <FormatDollarColor value={optionsStats.change} />
       </StyleCell>
       <StyleCell align="left">
         <Typography variant="h6" color="white">
-          ${optionsStats.change}
-        </Typography>
-      </StyleCell>
-      <StyleCell align="left">
-        <Typography variant="h6" color="white">
-          ${optionsStats.price}
+          ${optionsStats.premium}
         </Typography>
       </StyleCell>
       <StyleRightCell align="right" className="pt-2">
-        <CustomButton className="cursor-pointer text-white">Buy</CustomButton>
+        <CustomButton
+          className="cursor-pointer text-white"
+          onClick={(e) => setOpenDialogAnchorEl(e.currentTarget)}
+        >
+          {direction}
+        </CustomButton>
+        {openDialogAnchorEl && (
+          <PurchaseOptionDialog
+            key={idx}
+            direction={direction}
+            optionsStats={optionsStats}
+            anchorEl={openDialogAnchorEl}
+            setAnchorEl={setOpenDialogAnchorEl}
+          />
+        )}
       </StyleRightCell>
     </TableRow>
   );

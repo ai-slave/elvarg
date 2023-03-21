@@ -14,7 +14,7 @@ import { formatAmount } from 'utils/general';
 import { getUserReadableAmount } from 'utils/contracts';
 import { DECIMALS_STRIKE, DECIMALS_TOKEN } from 'constants/index';
 import Countdown from 'react-countdown';
-import ClosePositionDialog from 'components/zdte/ClosePositionDialog';
+import ClosePositionDialog from './ClosePositionDialog';
 import { useState } from 'react';
 import { IZdtePurchaseData } from 'store/Vault/zdte';
 
