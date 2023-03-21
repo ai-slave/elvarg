@@ -1,3 +1,4 @@
+import { getContractReadableAmount } from 'utils/contracts';
 import { ERC20__factory } from '@dopex-io/sdk';
 import { ZdtePositionMinter__factory } from './../../../mocks/factories/ZdtePositionMinter__factory';
 import { BigNumber } from 'ethers';
@@ -7,8 +8,11 @@ import { StateCreator } from 'zustand';
 
 import { CommonSlice } from 'store/Vault/common';
 import { WalletSlice } from 'store/Wallet';
-import { DECIMALS_STRIKE } from 'constants/index';
+import { DECIMALS_STRIKE, DECIMALS_USD } from 'constants/index';
 import { getUserReadableAmount } from 'utils/contracts';
+import oneEBigNumber from 'utils/math/oneEBigNumber';
+
+const ONE_DAY = 24 * 3600;
 
 export interface OptionsTableData {
   strike: number;
@@ -17,6 +21,7 @@ export interface OptionsTableData {
   change: number;
   changePercentage: number;
   premium: number;
+  openingFees: number;
 }
 
 export interface IZdteData {
@@ -123,13 +128,18 @@ export const createZdteSlice: StateCreator<
     if (!getBaseLpContract || !getQuoteLpContract || !accountAddress) return;
 
     try {
-      const baseLpContract = await getBaseLpContract();
-      const baseLpBalance = await baseLpContract.balanceOf(accountAddress);
-      const baseLpSymbol = await baseLpContract.symbol();
+      const [baseLpContract, quoteLpContract] = await Promise.all([
+        getBaseLpContract(),
+        getQuoteLpContract(),
+      ]);
 
-      const quoteLpContract = await getQuoteLpContract();
-      const quoteLpBalance = await quoteLpContract.balanceOf(accountAddress);
-      const quoteLpSymbol = await quoteLpContract.symbol();
+      const [baseLpBalance, baseLpSymbol, quoteLpBalance, quoteLpSymbol] =
+        await Promise.all([
+          baseLpContract.balanceOf(accountAddress),
+          baseLpContract.symbol(),
+          quoteLpContract.balanceOf(accountAddress),
+          quoteLpContract.symbol(),
+        ]);
 
       set((prevState) => ({
         ...prevState,
@@ -175,7 +185,7 @@ export const createZdteSlice: StateCreator<
           const zdtePosition = await zdteContract.zdtePositions(tokenId);
           return {
             ...zdtePosition,
-            livePnl: 0, // await zdteContract.calcPnl(tokenId),
+            livePnl: await zdteContract.calcPnl(tokenId),
           } as IZdtePurchaseData;
         })
       );
@@ -208,9 +218,19 @@ export const createZdteSlice: StateCreator<
 
       const zdteContract = await getZdteContract();
       const zdteAddress = zdteContract.address;
-      const markPrice = await zdteContract.getMarkPrice();
-      const strikeIncrement = await zdteContract.strikeIncrement();
-      const maxOtmPercentage = await zdteContract.maxOtmPercentage();
+      const [
+        markPrice,
+        strikeIncrement,
+        maxOtmPercentage,
+        baseTokenAddress,
+        quoteTokenAddress,
+      ] = await Promise.all([
+        zdteContract.getMarkPrice(),
+        zdteContract.strikeIncrement(),
+        zdteContract.maxOtmPercentage(),
+        zdteContract.base(),
+        zdteContract.quote(),
+      ]);
 
       const step = getUserReadableAmount(strikeIncrement, DECIMALS_STRIKE);
       const tokenPrice = getUserReadableAmount(markPrice, DECIMALS_STRIKE);
@@ -223,6 +243,14 @@ export const createZdteSlice: StateCreator<
       const strikes: OptionsTableData[] = [];
 
       for (let i = lowerRound; i <= upperRound; i += step) {
+        const ether = oneEBigNumber(18);
+        const contractStrike = getContractReadableAmount(i, DECIMALS_STRIKE);
+        const [premium, openingFees] = await Promise.all([
+          zdteContract.calcPremium(contractStrike, ether, ONE_DAY),
+          zdteContract.calcOpeningFees(ether, contractStrike),
+        ]);
+
+        // TODO: fix breakeven
         strikes.push({
           strike: i,
           breakeven: roundToNearestHalf((i * 100) / tokenPrice),
@@ -231,29 +259,34 @@ export const createZdteSlice: StateCreator<
           changePercentage: roundToNearestHalf(
             ((i - tokenPrice) * 100) / tokenPrice
           ),
-          premium: 43,
+          premium:
+            premium.mul(100).div(oneEBigNumber(DECIMALS_USD)).toNumber() / 100,
+          openingFees:
+            openingFees.mul(100).div(oneEBigNumber(DECIMALS_USD)).toNumber() /
+            100,
         });
       }
 
-      const baseTokenAddress = await zdteContract.base();
       const baseTokenContract = ERC20__factory.connect(
         baseTokenAddress,
         provider
       );
-      const baseTokenSymbol = await baseTokenContract.symbol();
-      const userBaseTokenBalance = await baseTokenContract.balanceOf(
-        accountAddress
-      );
-
-      const quoteTokenAddress = await zdteContract.quote();
       const quoteTokenContract = ERC20__factory.connect(
         quoteTokenAddress,
         provider
       );
-      const quoteTokenSymbol = await quoteTokenContract.symbol();
-      const userQuoteTokenBalance = await quoteTokenContract.balanceOf(
-        accountAddress
-      );
+
+      const [
+        baseTokenSymbol,
+        userBaseTokenBalance,
+        quoteTokenSymbol,
+        userQuoteTokenBalance,
+      ] = await Promise.all([
+        baseTokenContract.symbol(),
+        baseTokenContract.balanceOf(accountAddress),
+        quoteTokenContract.symbol(),
+        quoteTokenContract.balanceOf(accountAddress),
+      ]);
 
       set((prevState) => ({
         ...prevState,

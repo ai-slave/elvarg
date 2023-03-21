@@ -2,10 +2,14 @@ import { ERC20__factory } from '@dopex-io/sdk';
 import { Box } from '@mui/material';
 import ContentRow from 'components/atlantics/InsuredPerps/ManageCard/ManagePosition/ContentRow';
 import { CustomButton, Dialog, Input, Typography } from 'components/UI';
-import { DECIMALS_STRIKE, DECIMALS_TOKEN, MAX_VALUE } from 'constants/index';
-import { BigNumber, utils } from 'ethers';
+import {
+  DECIMALS_STRIKE,
+  DECIMALS_TOKEN,
+  DECIMALS_USD,
+  MAX_VALUE,
+} from 'constants/index';
+import { BigNumber } from 'ethers';
 import useSendTx from 'hooks/useSendTx';
-import { ZdteLP__factory } from 'mocks/factories/ZdteLP__factory';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { useBoundStore } from 'store';
 import { OptionsTableData } from 'store/Vault/zdte';
@@ -38,18 +42,16 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
     zdteData,
     accountAddress,
   } = useBoundStore();
-  const tokenSymbol = zdteData?.baseTokenSymbol.toUpperCase();
-  const [baseTokenLongOptionAmount, setBaseTokenLongOptionAmount] = useState<
-    string | number
-  >(0);
+  const tokenSymbol = zdteData?.quoteTokenSymbol.toUpperCase();
+  const [amount, setAmount] = useState<string | number>(0);
   const [approved, setApproved] = useState<boolean>(false);
 
   const handleApprove = useCallback(async () => {
-    if (!signer || !zdteData?.baseTokenAddress) return;
+    if (!signer || !zdteData?.quoteTokenAddress) return;
 
     try {
       await sendTx(
-        ERC20__factory.connect(zdteData?.baseTokenAddress, signer),
+        ERC20__factory.connect(zdteData?.quoteTokenAddress, signer),
         'approve',
         [zdteData?.zdteAddress, MAX_VALUE]
       );
@@ -63,28 +65,26 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
     (async () => {
       if (!signer || !accountAddress || !zdteData) return;
       try {
-        const baseTokenContract = await ERC20__factory.connect(
-          zdteData.baseTokenAddress,
+        const quoteTokenContract = await ERC20__factory.connect(
+          zdteData.quoteTokenAddress,
           signer
         );
-        const allowance: BigNumber = await baseTokenContract.allowance(
+        const allowance: BigNumber = await quoteTokenContract.allowance(
           accountAddress,
           zdteData.zdteAddress
         );
         setApproved(
-          allowance.gte(
-            getContractReadableAmount(baseTokenLongOptionAmount, DECIMALS_TOKEN)
-          )
+          allowance.gte(getContractReadableAmount(amount, DECIMALS_TOKEN))
         );
       } catch (err) {
         console.log(err);
       }
     })();
-  }, [signer, accountAddress, baseTokenLongOptionAmount, zdteData]);
+  }, [signer, accountAddress, amount, zdteData]);
 
   const handleLongOptionAmount = useCallback(
     (e: { target: { value: React.SetStateAction<string | number> } }) =>
-      setBaseTokenLongOptionAmount(e.target.value),
+      setAmount(e.target.value),
     []
   );
 
@@ -96,10 +96,10 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
     try {
       await sendTx(zdteContract.connect(signer), 'longOptionPosition', [
         false,
-        getContractReadableAmount(baseTokenLongOptionAmount, DECIMALS_TOKEN),
+        getContractReadableAmount(amount, DECIMALS_TOKEN),
         getContractReadableAmount(optionsStats.strike, DECIMALS_STRIKE),
       ]).then(() => {
-        setBaseTokenLongOptionAmount('0');
+        setAmount('0');
       });
       await updateZdteData();
     } catch (e) {
@@ -110,7 +110,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
     provider,
     sendTx,
     updateZdteData,
-    baseTokenLongOptionAmount,
+    amount,
     getZdteContract,
     optionsStats,
   ]);
@@ -137,7 +137,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
             variant="default"
             type="number"
             placeholder="0.0"
-            value={baseTokenLongOptionAmount}
+            value={amount}
             onChange={handleLongOptionAmount}
             className=""
             leftElement={
@@ -165,43 +165,54 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
             title="Balance"
             content={`${formatAmount(
               getUserReadableAmount(
-                zdteData?.userBaseTokenBalance!,
-                DECIMALS_TOKEN
+                zdteData?.userQuoteTokenBalance!,
+                DECIMALS_USD
               ),
               2
-            )} ${zdteData?.baseTokenSymbol}`}
+            )} ${tokenSymbol}`}
           />
           <ContentRow title="Premium" content={`$${optionsStats.premium}`} />
           <ContentRow
             title="Opening fees"
-            content={`$${optionsStats.premium}`}
+            content={`$${optionsStats.openingFees}`}
           />
-          <ContentRow title="Total cost" content={`$${optionsStats.premium}`} />
+          <ContentRow
+            title="Cost per option"
+            content={`$${optionsStats.premium + optionsStats.openingFees}`}
+          />
+          <ContentRow
+            title="Total cost"
+            content={`$${formatAmount(
+              (optionsStats.premium + optionsStats.openingFees) *
+                Number(amount),
+              2
+            )}`}
+          />
         </Box>
         <CustomButton
           size="medium"
           className="w-full mt-4 !rounded-md"
           color={
             !approved ||
-            (baseTokenLongOptionAmount > 0 &&
-              baseTokenLongOptionAmount <=
+            (amount > 0 &&
+              amount <=
                 getUserReadableAmount(
-                  zdteData?.userBaseTokenBalance!,
-                  DECIMALS_TOKEN
+                  zdteData?.userQuoteTokenBalance!,
+                  DECIMALS_USD
                 ))
               ? 'primary'
               : 'mineshaft'
           }
-          disabled={baseTokenLongOptionAmount <= 0}
+          disabled={amount <= 0}
           onClick={!approved ? handleApprove : handleOpenPosition}
         >
           {approved
-            ? baseTokenLongOptionAmount == 0
+            ? amount == 0
               ? 'Insert an amount'
-              : baseTokenLongOptionAmount >
+              : amount >
                 getUserReadableAmount(
-                  zdteData?.userBaseTokenBalance!,
-                  DECIMALS_TOKEN
+                  zdteData?.userQuoteTokenBalance!,
+                  DECIMALS_USD
                 )
               ? 'Insufficient balance'
               : direction
