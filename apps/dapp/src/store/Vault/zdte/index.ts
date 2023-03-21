@@ -31,20 +31,20 @@ export interface IZdteData {
   // dpx, weth
   baseTokenAddress: string;
   baseTokenSymbol: string;
-  userBaseTokenBalance: BigNumber;
   // usdc
   quoteTokenAddress: string;
   quoteTokenSymbol: string;
-  userQuoteTokenBalance: BigNumber;
+  baseLpContractAddress: string;
+  baseLpSymbol: string;
+  quoteLpContractAddress: string;
+  quoteLpSymbol: string;
 }
 
 export interface IZdteLpData {
-  baseLpContractAddress: string;
-  baseLpSymbol: string;
   baseLpBalance: BigNumber;
-  quoteLpContractAddress: string;
-  quoteLpSymbol: string;
   quoteLpBalance: BigNumber;
+  userBaseTokenBalance: BigNumber;
+  userQuoteTokenBalance: BigNumber;
 }
 
 export interface IZdtePurchaseData {
@@ -123,33 +123,54 @@ export const createZdteSlice: StateCreator<
     }
   },
   updateUserZdteLpData: async () => {
-    const { getBaseLpContract, getQuoteLpContract, accountAddress } = get();
+    const {
+      getBaseLpContract,
+      getQuoteLpContract,
+      accountAddress,
+      provider,
+      getZdteContract,
+    } = get();
 
     if (!getBaseLpContract || !getQuoteLpContract || !accountAddress) return;
 
     try {
-      const [baseLpContract, quoteLpContract] = await Promise.all([
-        getBaseLpContract(),
-        getQuoteLpContract(),
+      const [baseLpContract, quoteLpContract, zdteContract] = await Promise.all(
+        [getBaseLpContract(), getQuoteLpContract(), getZdteContract()]
+      );
+
+      const [
+        baseLpBalance,
+        quoteLpBalance,
+        baseTokenAddress,
+        quoteTokenAddress,
+      ] = await Promise.all([
+        baseLpContract.balanceOf(accountAddress),
+        quoteLpContract.balanceOf(accountAddress),
+        zdteContract.base(),
+        zdteContract.quote(),
       ]);
 
-      const [baseLpBalance, baseLpSymbol, quoteLpBalance, quoteLpSymbol] =
-        await Promise.all([
-          baseLpContract.balanceOf(accountAddress),
-          baseLpContract.symbol(),
-          quoteLpContract.balanceOf(accountAddress),
-          quoteLpContract.symbol(),
-        ]);
+      const baseTokenContract = ERC20__factory.connect(
+        baseTokenAddress,
+        provider
+      );
+      const quoteTokenContract = ERC20__factory.connect(
+        quoteTokenAddress,
+        provider
+      );
+
+      const [userBaseTokenBalance, userQuoteTokenBalance] = await Promise.all([
+        baseTokenContract.balanceOf(accountAddress),
+        quoteTokenContract.balanceOf(accountAddress),
+      ]);
 
       set((prevState) => ({
         ...prevState,
         userZdteLpData: {
-          baseLpContractAddress: baseLpContract.address,
-          baseLpSymbol: baseLpSymbol,
           baseLpBalance: baseLpBalance,
-          quoteLpContractAddress: quoteLpContract.address,
+          userBaseTokenBalance: userBaseTokenBalance,
           quoteLpBalance: quoteLpBalance,
-          quoteLpSymbol: quoteLpSymbol,
+          userQuoteTokenBalance: userQuoteTokenBalance,
         },
       }));
     } catch (err) {
@@ -207,6 +228,8 @@ export const createZdteSlice: StateCreator<
       accountAddress,
       updateUserZdteLpData,
       updateUserZdtePurchaseData,
+      getBaseLpContract,
+      getQuoteLpContract,
     } = get();
 
     if (!selectedPoolName || !provider || !getZdteContract || !accountAddress)
@@ -216,15 +239,25 @@ export const createZdteSlice: StateCreator<
       await updateUserZdteLpData();
       await updateUserZdtePurchaseData();
 
-      const zdteContract = await getZdteContract();
+      const [zdteContract, baseLpContract, quoteLpContract] = await Promise.all(
+        [getZdteContract(), getBaseLpContract(), getQuoteLpContract()]
+      );
+
       const zdteAddress = zdteContract.address;
+      const baseLpContractAddress = baseLpContract.address;
+      const quoteLpContractAddress = quoteLpContract.address;
+
       const [
+        baseLpSymbol,
+        quoteLpSymbol,
         markPrice,
         strikeIncrement,
         maxOtmPercentage,
         baseTokenAddress,
         quoteTokenAddress,
       ] = await Promise.all([
+        baseLpContract.symbol(),
+        quoteLpContract.symbol(),
         zdteContract.getMarkPrice(),
         zdteContract.strikeIncrement(),
         zdteContract.maxOtmPercentage(),
@@ -294,11 +327,15 @@ export const createZdteSlice: StateCreator<
           zdteAddress,
           tokenPrice,
           strikes,
+          baseLpContractAddress,
+          baseLpSymbol,
           baseTokenAddress,
           baseTokenSymbol,
           userBaseTokenBalance,
           quoteTokenAddress,
           quoteTokenSymbol,
+          quoteLpContractAddress,
+          quoteLpSymbol,
           userQuoteTokenBalance,
         },
       }));

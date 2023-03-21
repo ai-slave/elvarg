@@ -41,6 +41,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
     updateZdteData,
     zdteData,
     accountAddress,
+    userZdteLpData,
   } = useBoundStore();
   const tokenSymbol = zdteData?.quoteTokenSymbol.toUpperCase();
   const [amount, setAmount] = useState<string | number>(0);
@@ -95,7 +96,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
 
     try {
       await sendTx(zdteContract.connect(signer), 'longOptionPosition', [
-        false,
+        direction === 'Short', // isPut
         getContractReadableAmount(amount, DECIMALS_TOKEN),
         getContractReadableAmount(optionsStats.strike, DECIMALS_STRIKE),
       ]).then(() => {
@@ -107,6 +108,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
     }
   }, [
     signer,
+    direction,
     provider,
     sendTx,
     updateZdteData,
@@ -165,7 +167,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
             title="Balance"
             content={`${formatAmount(
               getUserReadableAmount(
-                zdteData?.userQuoteTokenBalance!,
+                userZdteLpData?.userQuoteTokenBalance!,
                 DECIMALS_USD
               ),
               2
@@ -197,7 +199,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
             (amount > 0 &&
               amount <=
                 getUserReadableAmount(
-                  zdteData?.userQuoteTokenBalance!,
+                  userZdteLpData?.userQuoteTokenBalance!,
                   DECIMALS_USD
                 ))
               ? 'primary'
@@ -211,7 +213,7 @@ const PurchaseOptionDialog: FC<PurchaseOptionDialogProps> = ({
               ? 'Insert an amount'
               : amount >
                 getUserReadableAmount(
-                  zdteData?.userQuoteTokenBalance!,
+                  userZdteLpData?.userQuoteTokenBalance!,
                   DECIMALS_USD
                 )
               ? 'Insufficient balance'

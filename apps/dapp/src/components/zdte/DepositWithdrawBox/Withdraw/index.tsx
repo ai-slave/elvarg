@@ -129,7 +129,7 @@ const Withdraw: FC<WithdrawProps> = ({}) => {
                   color="white"
                   className="flex items-center ml-2"
                 >
-                  {userZdteLpData?.baseLpSymbol}
+                  {zdteData?.baseLpSymbol}
                 </Typography>
               </Box>
             </Box>
@@ -145,7 +145,7 @@ const Withdraw: FC<WithdrawProps> = ({}) => {
               DECIMALS_TOKEN
             ),
             2
-          )} ${userZdteLpData?.baseLpSymbol}`}
+          )} ${zdteData?.baseLpSymbol}`}
         />
       </Box>
       <CustomButton
