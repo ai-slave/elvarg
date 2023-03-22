@@ -31,13 +31,17 @@ export interface IZdteData {
   // dpx, weth
   baseTokenAddress: string;
   baseTokenSymbol: string;
+  baseLpContractAddress: string;
+  baseLpSymbol: string;
+  baseLpTokenLiquidty: BigNumber;
+  baseLpAssetBalance: BigNumber;
   // usdc
   quoteTokenAddress: string;
   quoteTokenSymbol: string;
-  baseLpContractAddress: string;
-  baseLpSymbol: string;
   quoteLpContractAddress: string;
   quoteLpSymbol: string;
+  quoteLpTokenLiquidty: BigNumber;
+  quoteLpAssetBalance: BigNumber;
 }
 
 export interface IZdteLpData {
@@ -49,6 +53,8 @@ export interface IZdteLpData {
 
 export interface IZdtePurchaseData {
   isOpen: boolean;
+  isPut: boolean;
+  isSpread: boolean;
   positions: BigNumber;
   longStrike: BigNumber;
   shortStrike: BigNumber;
@@ -56,10 +62,17 @@ export interface IZdtePurchaseData {
   shortPremium: BigNumber;
   fees: BigNumber;
   pnl: BigNumber;
-  livePnl: number;
   openedAt: BigNumber;
   expiry: BigNumber;
-  positionType: number;
+  livePnl: BigNumber;
+  positionId: BigNumber;
+}
+
+export interface ISpreadPair {
+  longStrike: number;
+  shortStrike: number;
+  premium: BigNumber;
+  fees: BigNumber;
 }
 
 export interface ZdteSlice {
@@ -72,6 +85,8 @@ export interface ZdteSlice {
   updateUserZdtePurchaseData: Function;
   zdteData?: IZdteData;
   updateZdteData: Function;
+  selectedSpreadPair?: ISpreadPair;
+  setSelectedSpreadPair: Function;
 }
 
 export const createZdteSlice: StateCreator<
@@ -88,7 +103,7 @@ export const createZdteSlice: StateCreator<
     try {
       // Addresses[42161].ZDTE[selectedPoolName],
       return Zdte__factory.connect(
-        '0x937aaAC9bEcF4B6f495EcbA6d7A2Acd12c565D44',
+        '0xb86f1d07a898a3ed6caa626d3b605542d6263792',
         provider
       );
     } catch (err) {
@@ -207,6 +222,7 @@ export const createZdteSlice: StateCreator<
           return {
             ...zdtePosition,
             livePnl: await zdteContract.calcPnl(tokenId),
+            positionId: tokenId,
           } as IZdtePurchaseData;
         })
       );
@@ -255,6 +271,8 @@ export const createZdteSlice: StateCreator<
         maxOtmPercentage,
         baseTokenAddress,
         quoteTokenAddress,
+        baseLpTokenLiquidty,
+        quoteLpTokenLiquidty,
       ] = await Promise.all([
         baseLpContract.symbol(),
         quoteLpContract.symbol(),
@@ -263,6 +281,8 @@ export const createZdteSlice: StateCreator<
         zdteContract.maxOtmPercentage(),
         zdteContract.base(),
         zdteContract.quote(),
+        zdteContract.baseLpTokenLiquidty(),
+        zdteContract.quoteLpTokenLiquidty(),
       ]);
 
       const step = getUserReadableAmount(strikeIncrement, DECIMALS_STRIKE);
@@ -282,21 +302,20 @@ export const createZdteSlice: StateCreator<
           zdteContract.calcPremium(contractStrike, ether, ONE_DAY),
           zdteContract.calcOpeningFees(ether, contractStrike),
         ]);
+        const normalizedPremium = getUsdPrice(premium);
 
-        // TODO: fix breakeven
         strikes.push({
           strike: i,
-          breakeven: roundToNearestHalf((i * 100) / tokenPrice),
-          breakevenPercentage: roundToNearestHalf((i * 100) / tokenPrice),
+          breakeven: i + normalizedPremium,
+          breakevenPercentage: roundToNearestHalf(
+            (i + normalizedPremium) / tokenPrice
+          ),
           change: i - tokenPrice,
           changePercentage: roundToNearestHalf(
             ((i - tokenPrice) * 100) / tokenPrice
           ),
-          premium:
-            premium.mul(100).div(oneEBigNumber(DECIMALS_USD)).toNumber() / 100,
-          openingFees:
-            openingFees.mul(100).div(oneEBigNumber(DECIMALS_USD)).toNumber() /
-            100,
+          premium: normalizedPremium,
+          openingFees: getUsdPrice(openingFees),
         });
       }
 
@@ -311,14 +330,14 @@ export const createZdteSlice: StateCreator<
 
       const [
         baseTokenSymbol,
-        userBaseTokenBalance,
+        baseLpAssetBalance,
         quoteTokenSymbol,
-        userQuoteTokenBalance,
+        quoteLpAssetBalance,
       ] = await Promise.all([
         baseTokenContract.symbol(),
-        baseTokenContract.balanceOf(accountAddress),
+        baseLpContract.totalAvailableAssets(),
         quoteTokenContract.symbol(),
-        quoteTokenContract.balanceOf(accountAddress),
+        quoteLpContract.totalAvailableAssets(),
       ]);
 
       set((prevState) => ({
@@ -331,12 +350,14 @@ export const createZdteSlice: StateCreator<
           baseLpSymbol,
           baseTokenAddress,
           baseTokenSymbol,
-          userBaseTokenBalance,
+          baseLpAssetBalance,
+          baseLpTokenLiquidty,
           quoteTokenAddress,
           quoteTokenSymbol,
           quoteLpContractAddress,
           quoteLpSymbol,
-          userQuoteTokenBalance,
+          quoteLpAssetBalance,
+          quoteLpTokenLiquidty,
         },
       }));
     } catch (err) {
@@ -344,8 +365,27 @@ export const createZdteSlice: StateCreator<
       throw new Error('fail to update zdte data');
     }
   },
+  setSelectedSpreadPair: async (pair: ISpreadPair) => {
+    const { getZdteContract } = get();
+
+    if (!getZdteContract) return;
+
+    try {
+      set((prevState) => ({
+        ...prevState,
+        selectedSpreadPair: pair,
+      }));
+    } catch (err) {
+      console.log(err);
+      throw new Error('fail to update selected spread pair');
+    }
+  },
 });
 
 function roundToNearestHalf(num: number): number {
   return Math.round(num * 2) / 2;
+}
+
+function getUsdPrice(value: BigNumber): number {
+  return value.mul(100).div(oneEBigNumber(DECIMALS_USD)).toNumber() / 100;
 }

@@ -7,8 +7,9 @@ import ZdteTvChart from 'components/zdte/TvChart';
 import Stats from 'components/zdte/Stats';
 import { useBoundStore } from 'store';
 import { Suspense, useEffect } from 'react';
-import { CircularProgress } from '@mui/material';
+import { Alert, AlertTitle, CircularProgress } from '@mui/material';
 import React from 'react';
+import ErrorBoundary from 'components/error/ErrorBoundary';
 
 interface Props {
   zdte: string;
@@ -90,49 +91,9 @@ export async function getServerSideProps(context: { query: { zdte: string } }) {
   };
 }
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true, message: error?.message, status: error?.status };
-  }
-
-  override render() {
-    function addExtraProps(Component, extraProps) {
-      return <Component.type {...Component.props} {...extraProps} />;
-    }
-
-    if (this.state.hasError) {
-      return addExtraProps(this.props.fallback, {
-        errorMessage: this.state.message,
-        errorStatus: this.state.status,
-      });
-    }
-    return this.props.children;
-  }
-}
-
-function MyErrorBoundaryFallback({ errorMessage, errorStatus }) {
-  return (
-    <div className="container">
-      <h1>Error</h1>
-      <div className="row">
-        Error Status: <b>{errorStatus}</b>
-      </div>
-      <div className="row">
-        ErrorMessage: <b>{errorMessage}</b>
-      </div>
-    </div>
-  );
-}
-
 const ManagePage = ({ zdte }: Props) => {
   return (
-    <ErrorBoundary fallback={<MyErrorBoundaryFallback />}>
+    <ErrorBoundary>
       <Suspense fallback={<Loading />}>
         <Zdte zdte={zdte} />
       </Suspense>

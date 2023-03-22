@@ -1,6 +1,6 @@
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {
   Box,
+  CircularProgress,
   Table,
   TableBody,
   TableContainer,
@@ -15,7 +15,6 @@ import {
   StyleTableCellHeader,
 } from 'components/common/LpCommon/Table';
 import { OpenPositionsRow } from 'components/zdte/OpenPositions/OpenPositionsRow';
-import { BigNumber } from 'ethers';
 import { useBoundStore } from 'store';
 
 const StyleHeaderTable = styled(TableContainer)`
@@ -32,32 +31,16 @@ const StyleHeaderTable = styled(TableContainer)`
   }
 `;
 
-const data = [
-  {
-    isPut: true,
-    strike: BigNumber.from(2300000000),
-    amount: BigNumber.from(100),
-    pnl: 25,
-    expiry: BigNumber.from(1683781962),
-  },
-  {
-    isPut: false,
-    strike: BigNumber.from(2300000000),
-    amount: BigNumber.from(100),
-    pnl: -25,
-    expiry: BigNumber.from(1683781962),
-  },
-  {
-    isPut: false,
-    strike: BigNumber.from(2300000000),
-    amount: BigNumber.from(100),
-    pnl: 25,
-    expiry: BigNumber.from(1683781962),
-  },
-];
-
 export const OpenPositions = () => {
   const { userZdtePurchaseData } = useBoundStore();
+
+  if (userZdtePurchaseData === undefined) {
+    return (
+      <Box className="flex justify-center items-center">
+        <CircularProgress className="mb-[30rem]" size="40px" color="primary" />
+      </Box>
+    );
+  }
 
   return (
     <Box className="flex flex-col flex-grow w-full whitespace-nowrap">
@@ -67,9 +50,10 @@ export const OpenPositions = () => {
           <TableHead>
             <TableRow>
               <StyleLeftTableCell align="left" className="rounded-tl-xl">
-                Direction
+                <span className="text-sm text-stieglitz my-auto min-w-width">
+                  Strike
+                </span>
               </StyleLeftTableCell>
-              <StyleTableCellHeader>Strike</StyleTableCellHeader>
               <StyleTableCellHeader>Amount</StyleTableCellHeader>
               <StyleTableCellHeader>Profit & Loss</StyleTableCellHeader>
               <StyleTableCellHeader>Time to Expiry</StyleTableCellHeader>
@@ -79,7 +63,7 @@ export const OpenPositions = () => {
             </TableRow>
           </TableHead>
           <TableBody className="rounded-lg">
-            {userZdtePurchaseData?.map((position, index) => (
+            {userZdtePurchaseData.map((position, index) => (
               <OpenPositionsRow key={index} position={position} idx={index} />
             ))}
           </TableBody>

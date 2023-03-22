@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Typography from 'components/UI/Typography';
 import Deposit from 'components/zdte/DepositWithdrawBox/Deposit';
 import Withdraw from 'components/zdte/DepositWithdrawBox/Withdraw';
+import Trade from 'components/zdte/DepositWithdrawBox/Trade';
 
 const buttonLabels = ['Deposit', 'Withdraw'];
 
@@ -34,7 +35,7 @@ const ManageCard = () => {
           </Button>
         ))}
       </ButtonGroup>
-      {active === 'Deposit' ? <Deposit /> : <Withdraw />}
+      {active === 'Deposit' ? <Trade /> : <Withdraw />}
     </Box>
   );
 };

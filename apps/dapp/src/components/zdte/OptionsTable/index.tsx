@@ -17,11 +17,16 @@ import {
   StyleTableCellHeader,
 } from 'components/common/LpCommon/Table';
 import { OptionsTableRow } from 'components/zdte/OptionsTable/OptionsTableRow';
-import { DECIMALS_STRIKE } from 'constants/index';
+import { DECIMALS_STRIKE, DECIMALS_USD } from 'constants/index';
 import { BigNumber } from 'ethers';
+import { useCallback, useEffect, useState } from 'react';
 import { useBoundStore } from 'store';
+import { ISpreadPair } from 'store/Vault/zdte';
 import { getUserReadableAmount } from 'utils/contracts';
 import { formatAmount } from 'utils/general';
+import oneEBigNumber from 'utils/math/oneEBigNumber';
+
+const ONE_DAY = 24 * 3600;
 
 const StyleHeaderTable = styled(TableContainer)`
   table {
@@ -38,7 +43,43 @@ const StyleHeaderTable = styled(TableContainer)`
 `;
 
 export const OptionsTable = () => {
-  const { zdteData } = useBoundStore();
+  const {
+    zdteData,
+    selectedSpreadPair,
+    getZdteContract,
+    signer,
+    provider,
+    setSelectedSpreadPair,
+  } = useBoundStore();
+
+  const zdteContract = getZdteContract();
+  const tokenPrice = zdteData?.tokenPrice;
+
+  const handleSelectLongStrike = useCallback(
+    async (value: number) => {
+      if (!signer || !provider || !zdteContract || !setSelectedSpreadPair)
+        return;
+      try {
+        if (
+          selectedSpreadPair === undefined ||
+          selectedSpreadPair.longStrike === undefined
+        ) {
+          setSelectedSpreadPair({
+            ...selectedSpreadPair,
+            longStrike: value,
+          });
+        } else {
+          setSelectedSpreadPair({
+            ...selectedSpreadPair,
+            shortStrike: value,
+          });
+        }
+      } catch (e) {
+        console.log('fail to set strike', e);
+      }
+    },
+    [signer, provider, zdteContract, selectedSpreadPair, setSelectedSpreadPair]
+  );
 
   if (zdteData === undefined) {
     return (
@@ -47,8 +88,6 @@ export const OptionsTable = () => {
       </Box>
     );
   }
-
-  const tokenPrice = formatAmount(zdteData?.tokenPrice);
 
   return (
     <Box className="flex flex-col flex-grow w-full whitespace-nowrap">
@@ -77,13 +116,14 @@ export const OptionsTable = () => {
           </TableHead>
           <TableBody className="rounded-lg">
             {zdteData.strikes
-              .filter((s) => s.strike < zdteData.tokenPrice)
+              .filter((s) => s.strike <= zdteData.tokenPrice)
               .map((optionsStats, index) => (
                 <OptionsTableRow
-                  tokenSymbol={zdteData.baseTokenSymbol}
-                  tokenPrice={zdteData?.tokenPrice}
                   key={index}
+                  tokenPrice={tokenPrice}
                   optionsStats={optionsStats}
+                  selectedSpreadPair={selectedSpreadPair}
+                  handleSelectLongStrike={handleSelectLongStrike}
                   idx={index}
                 />
               ))}
@@ -106,10 +146,11 @@ export const OptionsTable = () => {
               .filter((s) => s.strike > zdteData.tokenPrice)
               .map((optionsStats, index) => (
                 <OptionsTableRow
-                  tokenSymbol={zdteData.baseTokenSymbol}
                   key={index}
-                  tokenPrice={zdteData?.tokenPrice}
+                  tokenPrice={tokenPrice}
                   optionsStats={optionsStats}
+                  selectedSpreadPair={selectedSpreadPair}
+                  handleSelectLongStrike={handleSelectLongStrike}
                   idx={index}
                 />
               ))}

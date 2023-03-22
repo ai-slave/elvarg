@@ -19,13 +19,13 @@ const Withdraw: FC<WithdrawProps> = ({}) => {
   const sendTx = useSendTx();
 
   const {
-    userZdteLpData,
     signer,
     provider,
     getZdteContract,
     updateZdteData,
     getBaseLpContract,
     zdteData,
+    userZdteLpData,
     accountAddress,
   } = useBoundStore();
 
@@ -156,7 +156,7 @@ const Withdraw: FC<WithdrawProps> = ({}) => {
           (tokenWithdrawAmount > 0 &&
             tokenWithdrawAmount <=
               getUserReadableAmount(
-                zdteData?.userBaseTokenBalance!,
+                userZdteLpData?.userBaseTokenBalance!,
                 DECIMALS_TOKEN
               ) &&
             canWithdraw)
@@ -171,7 +171,7 @@ const Withdraw: FC<WithdrawProps> = ({}) => {
             ? 'Insert an amount'
             : tokenWithdrawAmount >
               getUserReadableAmount(
-                zdteData?.userBaseTokenBalance!,
+                userZdteLpData?.userBaseTokenBalance!,
                 DECIMALS_TOKEN
               )
             ? 'Insufficient balance'

@@ -24,6 +24,7 @@ const Deposit: FC<DepositProps> = ({}) => {
     accountAddress,
     getZdteContract,
     updateZdteData,
+    userZdteLpData,
   } = useBoundStore();
 
   const zdteContract = getZdteContract();
@@ -80,9 +81,9 @@ const Deposit: FC<DepositProps> = ({}) => {
 
   const handleMax = useCallback(() => {
     setBaseTokenDepositAmount(
-      utils.formatEther(zdteData?.userBaseTokenBalance!)
+      utils.formatEther(userZdteLpData?.userBaseTokenBalance!)
     );
-  }, [zdteData]);
+  }, [userZdteLpData]);
 
   const handleOpenPosition = useCallback(async () => {
     if (!signer || !provider || !zdteContract) return;
@@ -106,6 +107,7 @@ const Deposit: FC<DepositProps> = ({}) => {
     sendTx,
   ]);
 
+  // TODO: dropdown for call
   return (
     <Box className="rounded-xl space-y-2">
       <Box className="border border-neutral-800 bg-umbra rounded-xl">
@@ -147,7 +149,7 @@ const Deposit: FC<DepositProps> = ({}) => {
         <Typography variant="h6" className="flex justify-end">
           {`${formatAmount(
             getUserReadableAmount(
-              zdteData?.userBaseTokenBalance!,
+              userZdteLpData?.userBaseTokenBalance!,
               DECIMALS_TOKEN
             ),
             2
@@ -155,32 +157,6 @@ const Deposit: FC<DepositProps> = ({}) => {
           <span className="text-stieglitz ml-1">{tokenSymbol}</span>
         </Typography>
       </Box>
-      {/* <span className="text-up-only text-sm p-2">
-        Note: 50% of deposits will be zapped into {tokenSymbol}
-      </span> */}
-      {/* <Box className="space-y-2 p-2">
-        <ContentRow
-          title={`${tokenSymbol} Deposit`}
-          content={`${formatAmount(
-            getUserReadableAmount(42, DECIMALS_TOKEN),
-            2
-          )}`}
-        />
-        <ContentRow
-          title={`Available Liquidity (${tokenSymbol})`}
-          content={`${formatAmount(
-            getUserReadableAmount(42, DECIMALS_TOKEN),
-            2
-          )}`}
-        />
-        <ContentRow
-          title="Premium"
-          content={`${formatAmount(
-            getUserReadableAmount(42, DECIMALS_TOKEN),
-            2
-          )}`}
-        />
-      </Box> */}
       <CustomButton
         size="medium"
         className="w-full mt-5 !rounded-md"
@@ -189,13 +165,20 @@ const Deposit: FC<DepositProps> = ({}) => {
           (baseTokenDepositAmount > 0 &&
             baseTokenDepositAmount <=
               getUserReadableAmount(
-                zdteData?.userBaseTokenBalance!,
+                userZdteLpData?.userBaseTokenBalance!,
                 DECIMALS_TOKEN
               ))
             ? 'primary'
             : 'mineshaft'
         }
-        disabled={baseTokenDepositAmount <= 0}
+        disabled={
+          baseTokenDepositAmount <= 0 ||
+          baseTokenDepositAmount >
+            getUserReadableAmount(
+              userZdteLpData?.userBaseTokenBalance!,
+              DECIMALS_TOKEN
+            )
+        }
         onClick={!approved ? handleApprove : handleOpenPosition}
       >
         {approved
@@ -203,7 +186,7 @@ const Deposit: FC<DepositProps> = ({}) => {
             ? 'Insert an amount'
             : baseTokenDepositAmount >
               getUserReadableAmount(
-                zdteData?.userBaseTokenBalance!,
+                userZdteLpData?.userBaseTokenBalance!,
                 DECIMALS_TOKEN
               )
             ? 'Insufficient balance'

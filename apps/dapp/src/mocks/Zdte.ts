@@ -29,18 +29,21 @@ import type {
 
 export interface ZdteInterface extends utils.Interface {
   functions: {
-    'STRIKE_DECIMALS()': FunctionFragment;
     'addToContractWhitelist(address)': FunctionFragment;
     'base()': FunctionFragment;
     'baseLp()': FunctionFragment;
     'baseLpTokenLiquidty()': FunctionFragment;
+    'calcFees(uint256)': FunctionFragment;
+    'calcMargin(bool,uint256,uint256,uint256,uint256)': FunctionFragment;
     'calcOpeningFees(uint256,uint256)': FunctionFragment;
     'calcPnl(uint256)': FunctionFragment;
     'calcPremium(uint256,uint256,uint256)': FunctionFragment;
     'claimCollateral(uint256)': FunctionFragment;
     'deposit(bool,uint256)': FunctionFragment;
+    'divisor()': FunctionFragment;
     'emergencyWithdraw(address[],bool)': FunctionFragment;
-    'expireOptionPosition(uint256)': FunctionFragment;
+    'expireLongOptionPosition(uint256)': FunctionFragment;
+    'expireSpreadOptionPosition(uint256)': FunctionFragment;
     'feeDistributor()': FunctionFragment;
     'feeOpenPosition()': FunctionFragment;
     'genesisExpiry()': FunctionFragment;
@@ -76,18 +79,21 @@ export interface ZdteInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'STRIKE_DECIMALS'
       | 'addToContractWhitelist'
       | 'base'
       | 'baseLp'
       | 'baseLpTokenLiquidty'
+      | 'calcFees'
+      | 'calcMargin'
       | 'calcOpeningFees'
       | 'calcPnl'
       | 'calcPremium'
       | 'claimCollateral'
       | 'deposit'
+      | 'divisor'
       | 'emergencyWithdraw'
-      | 'expireOptionPosition'
+      | 'expireLongOptionPosition'
+      | 'expireSpreadOptionPosition'
       | 'feeDistributor'
       | 'feeOpenPosition'
       | 'genesisExpiry'
@@ -122,10 +128,6 @@ export interface ZdteInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'STRIKE_DECIMALS',
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: 'addToContractWhitelist',
     values: [PromiseOrValue<string>]
   ): string;
@@ -134,6 +136,20 @@ export interface ZdteInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: 'baseLpTokenLiquidty',
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calcFees',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calcMargin',
+    values: [
+      PromiseOrValue<boolean>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: 'calcOpeningFees',
@@ -159,12 +175,17 @@ export interface ZdteInterface extends utils.Interface {
     functionFragment: 'deposit',
     values: [PromiseOrValue<boolean>, PromiseOrValue<BigNumberish>]
   ): string;
+  encodeFunctionData(functionFragment: 'divisor', values?: undefined): string;
   encodeFunctionData(
     functionFragment: 'emergencyWithdraw',
     values: [PromiseOrValue<string>[], PromiseOrValue<boolean>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'expireOptionPosition',
+    functionFragment: 'expireLongOptionPosition',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'expireSpreadOptionPosition',
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
@@ -284,10 +305,6 @@ export interface ZdteInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: 'STRIKE_DECIMALS',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: 'addToContractWhitelist',
     data: BytesLike
   ): Result;
@@ -297,6 +314,8 @@ export interface ZdteInterface extends utils.Interface {
     functionFragment: 'baseLpTokenLiquidty',
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: 'calcFees', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'calcMargin', data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: 'calcOpeningFees',
     data: BytesLike
@@ -311,12 +330,17 @@ export interface ZdteInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'divisor', data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: 'emergencyWithdraw',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'expireOptionPosition',
+    functionFragment: 'expireLongOptionPosition',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'expireSpreadOptionPosition',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -422,9 +446,9 @@ export interface ZdteInterface extends utils.Interface {
 
   events: {
     'AddToContractWhitelist(address)': EventFragment;
-    'ClaimCollateral(uint256,address)': EventFragment;
     'Deposit(bool,uint256,address)': EventFragment;
-    'ExpireOptionPosition(uint256,uint256,address)': EventFragment;
+    'ExpireLongOptionPosition(uint256,uint256,address)': EventFragment;
+    'ExpireSpreadOptionPosition(uint256,uint256,address)': EventFragment;
     'LongOptionPosition(uint256,uint256,uint256,address)': EventFragment;
     'OwnershipTransferred(address,address)': EventFragment;
     'Paused(address)': EventFragment;
@@ -435,9 +459,9 @@ export interface ZdteInterface extends utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: 'AddToContractWhitelist'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'ClaimCollateral'): EventFragment;
   getEvent(nameOrSignatureOrTopic: 'Deposit'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'ExpireOptionPosition'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ExpireLongOptionPosition'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ExpireSpreadOptionPosition'): EventFragment;
   getEvent(nameOrSignatureOrTopic: 'LongOptionPosition'): EventFragment;
   getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
   getEvent(nameOrSignatureOrTopic: 'Paused'): EventFragment;
@@ -460,17 +484,6 @@ export type AddToContractWhitelistEvent = TypedEvent<
 export type AddToContractWhitelistEventFilter =
   TypedEventFilter<AddToContractWhitelistEvent>;
 
-export interface ClaimCollateralEventObject {
-  amount: BigNumber;
-  sender: string;
-}
-export type ClaimCollateralEvent = TypedEvent<
-  [BigNumber, string],
-  ClaimCollateralEventObject
->;
-
-export type ClaimCollateralEventFilter = TypedEventFilter<ClaimCollateralEvent>;
-
 export interface DepositEventObject {
   isQuote: boolean;
   amount: BigNumber;
@@ -483,18 +496,31 @@ export type DepositEvent = TypedEvent<
 
 export type DepositEventFilter = TypedEventFilter<DepositEvent>;
 
-export interface ExpireOptionPositionEventObject {
+export interface ExpireLongOptionPositionEventObject {
   id: BigNumber;
   pnl: BigNumber;
   user: string;
 }
-export type ExpireOptionPositionEvent = TypedEvent<
+export type ExpireLongOptionPositionEvent = TypedEvent<
   [BigNumber, BigNumber, string],
-  ExpireOptionPositionEventObject
+  ExpireLongOptionPositionEventObject
 >;
 
-export type ExpireOptionPositionEventFilter =
-  TypedEventFilter<ExpireOptionPositionEvent>;
+export type ExpireLongOptionPositionEventFilter =
+  TypedEventFilter<ExpireLongOptionPositionEvent>;
+
+export interface ExpireSpreadOptionPositionEventObject {
+  id: BigNumber;
+  pnl: BigNumber;
+  user: string;
+}
+export type ExpireSpreadOptionPositionEvent = TypedEvent<
+  [BigNumber, BigNumber, string],
+  ExpireSpreadOptionPositionEventObject
+>;
+
+export type ExpireSpreadOptionPositionEventFilter =
+  TypedEventFilter<ExpireSpreadOptionPositionEvent>;
 
 export interface LongOptionPositionEventObject {
   id: BigNumber;
@@ -601,8 +627,6 @@ export interface Zdte extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -614,11 +638,25 @@ export interface Zdte extends BaseContract {
 
     baseLpTokenLiquidty(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    calcOpeningFees(
+    calcFees(
       amount: PromiseOrValue<BigNumberish>,
-      strike: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[BigNumber] & { openingFees: BigNumber }>;
+    ): Promise<[BigNumber] & { fees: BigNumber }>;
+
+    calcMargin(
+      isPut: PromiseOrValue<boolean>,
+      longStrike: PromiseOrValue<BigNumberish>,
+      shortStrike: PromiseOrValue<BigNumberish>,
+      longPremium: PromiseOrValue<BigNumberish>,
+      shortPremium: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { margin: BigNumber }>;
+
+    calcOpeningFees(
+      strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { premium: BigNumber }>;
 
     calcPnl(
       id: PromiseOrValue<BigNumberish>,
@@ -643,13 +681,20 @@ export interface Zdte extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    divisor(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
       transferNative: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    expireOptionPosition(
+    expireLongOptionPosition(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    expireSpreadOptionPosition(
       id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -763,6 +808,8 @@ export interface Zdte extends BaseContract {
     ): Promise<
       [
         boolean,
+        boolean,
+        boolean,
         BigNumber,
         BigNumber,
         BigNumber,
@@ -771,10 +818,11 @@ export interface Zdte extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
-        BigNumber,
-        number
+        BigNumber
       ] & {
         isOpen: boolean;
+        isPut: boolean;
+        isSpread: boolean;
         positions: BigNumber;
         longStrike: BigNumber;
         shortStrike: BigNumber;
@@ -784,12 +832,9 @@ export interface Zdte extends BaseContract {
         pnl: BigNumber;
         openedAt: BigNumber;
         expiry: BigNumber;
-        positionType: number;
       }
     >;
   };
-
-  STRIKE_DECIMALS(overrides?: CallOverrides): Promise<BigNumber>;
 
   addToContractWhitelist(
     _contract: PromiseOrValue<string>,
@@ -802,9 +847,23 @@ export interface Zdte extends BaseContract {
 
   baseLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
 
-  calcOpeningFees(
+  calcFees(
     amount: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  calcMargin(
+    isPut: PromiseOrValue<boolean>,
+    longStrike: PromiseOrValue<BigNumberish>,
+    shortStrike: PromiseOrValue<BigNumberish>,
+    longPremium: PromiseOrValue<BigNumberish>,
+    shortPremium: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  calcOpeningFees(
     strike: PromiseOrValue<BigNumberish>,
+    amount: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -831,13 +890,20 @@ export interface Zdte extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  divisor(overrides?: CallOverrides): Promise<BigNumber>;
+
   emergencyWithdraw(
     tokens: PromiseOrValue<string>[],
     transferNative: PromiseOrValue<boolean>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  expireOptionPosition(
+  expireLongOptionPosition(
+    id: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  expireSpreadOptionPosition(
     id: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -947,6 +1013,8 @@ export interface Zdte extends BaseContract {
   ): Promise<
     [
       boolean,
+      boolean,
+      boolean,
       BigNumber,
       BigNumber,
       BigNumber,
@@ -955,10 +1023,11 @@ export interface Zdte extends BaseContract {
       BigNumber,
       BigNumber,
       BigNumber,
-      BigNumber,
-      number
+      BigNumber
     ] & {
       isOpen: boolean;
+      isPut: boolean;
+      isSpread: boolean;
       positions: BigNumber;
       longStrike: BigNumber;
       shortStrike: BigNumber;
@@ -968,13 +1037,10 @@ export interface Zdte extends BaseContract {
       pnl: BigNumber;
       openedAt: BigNumber;
       expiry: BigNumber;
-      positionType: number;
     }
   >;
 
   callStatic: {
-    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<BigNumber>;
-
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -986,9 +1052,23 @@ export interface Zdte extends BaseContract {
 
     baseLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
 
-    calcOpeningFees(
+    calcFees(
       amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcMargin(
+      isPut: PromiseOrValue<boolean>,
+      longStrike: PromiseOrValue<BigNumberish>,
+      shortStrike: PromiseOrValue<BigNumberish>,
+      longPremium: PromiseOrValue<BigNumberish>,
+      shortPremium: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcOpeningFees(
       strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1015,13 +1095,20 @@ export interface Zdte extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    divisor(overrides?: CallOverrides): Promise<BigNumber>;
+
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
       transferNative: PromiseOrValue<boolean>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    expireOptionPosition(
+    expireLongOptionPosition(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    expireSpreadOptionPosition(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1125,6 +1212,8 @@ export interface Zdte extends BaseContract {
     ): Promise<
       [
         boolean,
+        boolean,
+        boolean,
         BigNumber,
         BigNumber,
         BigNumber,
@@ -1133,10 +1222,11 @@ export interface Zdte extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
-        BigNumber,
-        number
+        BigNumber
       ] & {
         isOpen: boolean;
+        isPut: boolean;
+        isSpread: boolean;
         positions: BigNumber;
         longStrike: BigNumber;
         shortStrike: BigNumber;
@@ -1146,7 +1236,6 @@ export interface Zdte extends BaseContract {
         pnl: BigNumber;
         openedAt: BigNumber;
         expiry: BigNumber;
-        positionType: number;
       }
     >;
   };
@@ -1159,15 +1248,6 @@ export interface Zdte extends BaseContract {
       _contract?: PromiseOrValue<string> | null
     ): AddToContractWhitelistEventFilter;
 
-    'ClaimCollateral(uint256,address)'(
-      amount?: null,
-      sender?: PromiseOrValue<string> | null
-    ): ClaimCollateralEventFilter;
-    ClaimCollateral(
-      amount?: null,
-      sender?: PromiseOrValue<string> | null
-    ): ClaimCollateralEventFilter;
-
     'Deposit(bool,uint256,address)'(
       isQuote?: null,
       amount?: null,
@@ -1179,16 +1259,27 @@ export interface Zdte extends BaseContract {
       sender?: PromiseOrValue<string> | null
     ): DepositEventFilter;
 
-    'ExpireOptionPosition(uint256,uint256,address)'(
+    'ExpireLongOptionPosition(uint256,uint256,address)'(
       id?: null,
       pnl?: null,
       user?: PromiseOrValue<string> | null
-    ): ExpireOptionPositionEventFilter;
-    ExpireOptionPosition(
+    ): ExpireLongOptionPositionEventFilter;
+    ExpireLongOptionPosition(
       id?: null,
       pnl?: null,
       user?: PromiseOrValue<string> | null
-    ): ExpireOptionPositionEventFilter;
+    ): ExpireLongOptionPositionEventFilter;
+
+    'ExpireSpreadOptionPosition(uint256,uint256,address)'(
+      id?: null,
+      pnl?: null,
+      user?: PromiseOrValue<string> | null
+    ): ExpireSpreadOptionPositionEventFilter;
+    ExpireSpreadOptionPosition(
+      id?: null,
+      pnl?: null,
+      user?: PromiseOrValue<string> | null
+    ): ExpireSpreadOptionPositionEventFilter;
 
     'LongOptionPosition(uint256,uint256,uint256,address)'(
       id?: null,
@@ -1253,8 +1344,6 @@ export interface Zdte extends BaseContract {
   };
 
   estimateGas: {
-    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<BigNumber>;
-
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1266,9 +1355,23 @@ export interface Zdte extends BaseContract {
 
     baseLpTokenLiquidty(overrides?: CallOverrides): Promise<BigNumber>;
 
-    calcOpeningFees(
+    calcFees(
       amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcMargin(
+      isPut: PromiseOrValue<boolean>,
+      longStrike: PromiseOrValue<BigNumberish>,
+      shortStrike: PromiseOrValue<BigNumberish>,
+      longPremium: PromiseOrValue<BigNumberish>,
+      shortPremium: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calcOpeningFees(
       strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1295,13 +1398,20 @@ export interface Zdte extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    divisor(overrides?: CallOverrides): Promise<BigNumber>;
+
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
       transferNative: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    expireOptionPosition(
+    expireLongOptionPosition(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    expireSpreadOptionPosition(
       id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1412,8 +1522,6 @@ export interface Zdte extends BaseContract {
   };
 
   populateTransaction: {
-    STRIKE_DECIMALS(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     addToContractWhitelist(
       _contract: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1427,9 +1535,23 @@ export interface Zdte extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    calcOpeningFees(
+    calcFees(
       amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calcMargin(
+      isPut: PromiseOrValue<boolean>,
+      longStrike: PromiseOrValue<BigNumberish>,
+      shortStrike: PromiseOrValue<BigNumberish>,
+      longPremium: PromiseOrValue<BigNumberish>,
+      shortPremium: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calcOpeningFees(
       strike: PromiseOrValue<BigNumberish>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1456,13 +1578,20 @@ export interface Zdte extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    divisor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     emergencyWithdraw(
       tokens: PromiseOrValue<string>[],
       transferNative: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    expireOptionPosition(
+    expireLongOptionPosition(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    expireSpreadOptionPosition(
       id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

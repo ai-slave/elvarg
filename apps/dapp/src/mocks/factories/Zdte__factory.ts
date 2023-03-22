@@ -76,25 +76,6 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-    ],
-    name: 'ClaimCollateral',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
         internalType: 'bool',
         name: 'isQuote',
         type: 'bool',
@@ -137,7 +118,32 @@ const _abi = [
         type: 'address',
       },
     ],
-    name: 'ExpireOptionPosition',
+    name: 'ExpireLongOptionPosition',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'pnl',
+        type: 'uint256',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+    ],
+    name: 'ExpireSpreadOptionPosition',
     type: 'event',
   },
   {
@@ -292,19 +298,6 @@ const _abi = [
     type: 'event',
   },
   {
-    inputs: [],
-    name: 'STRIKE_DECIMALS',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'address',
@@ -363,9 +356,67 @@ const _abi = [
         name: 'amount',
         type: 'uint256',
       },
+    ],
+    name: 'calcFees',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'fees',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bool',
+        name: 'isPut',
+        type: 'bool',
+      },
+      {
+        internalType: 'uint256',
+        name: 'longStrike',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'shortStrike',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'longPremium',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'shortPremium',
+        type: 'uint256',
+      },
+    ],
+    name: 'calcMargin',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'margin',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
       {
         internalType: 'uint256',
         name: 'strike',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
         type: 'uint256',
       },
     ],
@@ -373,7 +424,7 @@ const _abi = [
     outputs: [
       {
         internalType: 'uint256',
-        name: 'openingFees',
+        name: 'premium',
         type: 'uint256',
       },
     ],
@@ -460,6 +511,19 @@ const _abi = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'divisor',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'address[]',
@@ -485,7 +549,20 @@ const _abi = [
         type: 'uint256',
       },
     ],
-    name: 'expireOptionPosition',
+    name: 'expireLongOptionPosition',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+    ],
+    name: 'expireSpreadOptionPosition',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -938,6 +1015,16 @@ const _abi = [
         type: 'bool',
       },
       {
+        internalType: 'bool',
+        name: 'isPut',
+        type: 'bool',
+      },
+      {
+        internalType: 'bool',
+        name: 'isSpread',
+        type: 'bool',
+      },
+      {
         internalType: 'uint256',
         name: 'positions',
         type: 'uint256',
@@ -981,11 +1068,6 @@ const _abi = [
         internalType: 'uint256',
         name: 'expiry',
         type: 'uint256',
-      },
-      {
-        internalType: 'enum Zdte.PositionType',
-        name: 'positionType',
-        type: 'uint8',
       },
     ],
     stateMutability: 'view',

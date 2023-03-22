@@ -6,11 +6,9 @@ import {
   StyleLeftCell,
   StyleRightCell,
 } from 'components/common/LpCommon/Table';
-import { OptionsTableData } from 'store/Vault/zdte';
-import PurchaseOptionDialog from 'components/zdte/OptionsTable/PurchaseOptionsDialog';
-import { useState } from 'react';
+import { ISpreadPair, OptionsTableData } from 'store/Vault/zdte';
 
-const FormatDollarColor = ({ value }: { value: number }) => {
+export const FormatDollarColor = ({ value }: { value: number }) => {
   if (value > 0) {
     return (
       <Typography variant="h6" color="up-only">
@@ -32,7 +30,7 @@ const FormatDollarColor = ({ value }: { value: number }) => {
   }
 };
 
-const FormatPercentColor = ({ value }: { value: number }) => {
+export const FormatPercentColor = ({ value }: { value: number }) => {
   if (value > 0) {
     return (
       <Typography variant="h6" color="up-only">
@@ -54,20 +52,54 @@ const FormatPercentColor = ({ value }: { value: number }) => {
   }
 };
 
+function isDisabled(
+  tokenPrice: number,
+  selectedSpreadPair: ISpreadPair | undefined,
+  strike: number
+): boolean {
+  if (
+    selectedSpreadPair === undefined ||
+    selectedSpreadPair.longStrike === undefined
+  ) {
+    return false;
+  } else if (
+    strike === tokenPrice ||
+    selectedSpreadPair.shortStrike !== undefined
+  ) {
+    return true;
+  } else if (
+    selectedSpreadPair.longStrike <= tokenPrice &&
+    strike < selectedSpreadPair.longStrike
+  ) {
+    return false;
+  } else if (
+    selectedSpreadPair.longStrike >= tokenPrice &&
+    strike > selectedSpreadPair.longStrike
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export const OptionsTableRow = ({
-  optionsStats,
   tokenPrice,
-  tokenSymbol,
+  optionsStats,
+  selectedSpreadPair,
   idx,
+  handleSelectLongStrike,
 }: {
-  optionsStats: OptionsTableData;
-  tokenSymbol: string;
   tokenPrice: number;
+  optionsStats: OptionsTableData;
+  selectedSpreadPair: ISpreadPair | undefined;
   idx: number;
+  handleSelectLongStrike: (longStrike: number) => void;
 }) => {
-  const direction = optionsStats.strike < tokenPrice ? 'Short' : 'Long';
-  const [openDialogAnchorEl, setOpenDialogAnchorEl] =
-    useState<null | HTMLElement>(null);
+  const direction =
+    selectedSpreadPair === undefined ||
+    selectedSpreadPair.longStrike === undefined
+      ? 'Long'
+      : 'Short';
+
   return (
     <TableRow key={idx} className="text-white mb-2 rounded-lg">
       <StyleLeftCell align="left">
@@ -101,19 +133,15 @@ export const OptionsTableRow = ({
       <StyleRightCell align="right" className="pt-2">
         <CustomButton
           className="cursor-pointer text-white"
-          onClick={(e) => setOpenDialogAnchorEl(e.currentTarget)}
+          disabled={isDisabled(
+            tokenPrice,
+            selectedSpreadPair,
+            optionsStats.strike
+          )}
+          onClick={() => handleSelectLongStrike(optionsStats.strike)}
         >
           {direction}
         </CustomButton>
-        {openDialogAnchorEl && (
-          <PurchaseOptionDialog
-            key={idx}
-            direction={direction}
-            optionsStats={optionsStats}
-            anchorEl={openDialogAnchorEl}
-            setAnchorEl={setOpenDialogAnchorEl}
-          />
-        )}
       </StyleRightCell>
     </TableRow>
   );
